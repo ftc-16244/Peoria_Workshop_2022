@@ -103,20 +103,31 @@ public class RedWarehouselAutoMeet2 extends LinearOpMode {
         // Trajectories - HIGH GOAL
         ///////////////////////////////////////////////////////////////////////////
         Trajectory  traj1 = drive.trajectoryBuilder(new Pose2d())
-                .forward(15)
+                .lineToLinearHeading(new Pose2d(42,3,Math.toRadians(179)))
+                .addTemporalMarker(-.25,()->{felipe.armMid();})
+                //.addTemporalMarker(-.25,()->{felipe.liftRise();})
                 .build();
 
-        Trajectory  traj2 = drive.trajectoryBuilder(traj1.end().plus(new Pose2d(0,0,Math.toRadians(90))))
+
+        /*Trajectory  traj1 = drive.trajectoryBuilder(new Pose2d())
+                .forward(15)
+                .build();*/
+
+        Trajectory  traj2 = drive.trajectoryBuilder(traj1.end())
+                .addTemporalMarker(-0.5,()->{felipe.thumbOpen();})
                 .forward(16)
                 .build();
 
         Trajectory traj3 = drive.trajectoryBuilder(traj2.end())
                 .addTemporalMarker(0.25,()->{felipe.armMid();})
-                .strafeRight(13)
+                .addTemporalMarker(1,()->{felipe.armInit();})
+                .addTemporalMarker(1,()->{felipe.thumbClose();})
+                .lineToLinearHeading(new Pose2d(5,-7,Math.toRadians(-90)))
+                //.strafeRight(13)
 
                 .build();
         // Move away from the alliance shipping hub so the arm can be retracted without hitting the hub
-        Trajectory traj4 = drive.trajectoryBuilder(traj3.end())
+        /*Trajectory traj4 = drive.trajectoryBuilder(traj3.end())
                 .addTemporalMarker(-0.8,()->{felipe.thumbOpen();})
                 .addTemporalMarker(1,()->{felipe.thumbClose();})
                 .addTemporalMarker(1.5,()->{felipe.armInit();})
@@ -132,6 +143,8 @@ public class RedWarehouselAutoMeet2 extends LinearOpMode {
         Trajectory traj7 = drive.trajectoryBuilder(traj6.end().plus(new Pose2d(0,0,Math.toRadians(0))))
                 .forward(25)
                 .build();
+
+
 
 
         ///////////////////////////////////////////////////////////////////////////
@@ -261,14 +274,13 @@ public class RedWarehouselAutoMeet2 extends LinearOpMode {
                     drive.turn(Math.toRadians(90));
                     drive.followTrajectory(traj2);
                     drive.followTrajectory(traj3);
-                    drive.followTrajectory(traj4);
+                    //drive.followTrajectory(traj4);
 
-                    drive.followTrajectory(traj5);
+                   // drive.followTrajectory(traj5);
                     felipe.liftLoad();
                     drive.turn(Math.toRadians(-180));
 
-                    drive.followTrajectory(traj6);
-                    drive.followTrajectory(traj7);
+                    //drive.followTrajectory(traj6);
 
                     break;
 
@@ -278,27 +290,27 @@ public class RedWarehouselAutoMeet2 extends LinearOpMode {
                     drive.turn(Math.toRadians(90));
                     drive.followTrajectory(traj2);
                     drive.followTrajectory(traj3);
-                    drive.followTrajectory(traj4);
+                    //drive.followTrajectory(traj4);
 
-                    drive.followTrajectory(traj5);
+                    //drive.followTrajectory(traj5);
                     felipe.liftLoad();
                     drive.turn(Math.toRadians(-180));
-                    drive.followTrajectory(traj6);
+                    //drive.followTrajectory(traj6);
 
                     break;
 
                 case RIGHT: //level 3 highest goal
                     felipe.liftRise();
                     drive.followTrajectory(traj1);
-                    drive.turn(Math.toRadians(-180));
+                    //drive.turn(Math.toRadians(-180));
                     drive.followTrajectory(traj2);
                     drive.followTrajectory(traj3);
-                    drive.followTrajectory(traj4);
+                    //drive.followTrajectory(traj4);
 
-                    drive.followTrajectory(traj5);
+                    //drive.followTrajectory(traj5);
                     felipe.liftLoad();
-                    drive.turn(Math.toRadians(-90));
-                    drive.followTrajectory(traj6);
+                    //drive.turn(Math.toRadians(-90));
+                    //drive.followTrajectory(traj6);
 
 
                     break;
