@@ -117,15 +117,28 @@ public class RedWarehouselAutoMeet2 extends LinearOpMode {
                 .addTemporalMarker(-0.5,()->{felipe.thumbOpen();})
                 .forward(16)
                 .build();
-
-        Trajectory traj3 = drive.trajectoryBuilder(traj2.end())
+        Trajectory traj4 = drive.trajectoryBuilder(traj1.end())
+                .addTemporalMarker(-0.5,()->{felipe.thumbOpen();})
                 .addTemporalMarker(0.25,()->{felipe.armMid();})
                 .addTemporalMarker(1,()->{felipe.armInit();})
                 .addTemporalMarker(1,()->{felipe.thumbClose();})
-                .lineToLinearHeading(new Pose2d(5,-7,Math.toRadians(-90)))
-                //.strafeRight(13)
+                .strafeLeft(4)
+                .build();
+        Trajectory traj3 = drive.trajectoryBuilder(traj4.end())
+                .lineToLinearHeading(new Pose2d(3,-5,Math.toRadians(-90)))
 
                 .build();
+
+
+
+        Trajectory traj5 = drive.trajectoryBuilder(traj3.end())
+                .forward(28)
+                .build();
+
+        Trajectory traj6 = drive.trajectoryBuilder(traj5.end())
+                .strafeLeft(22)
+                .build();
+
         // Move away from the alliance shipping hub so the arm can be retracted without hitting the hub
         /*Trajectory traj4 = drive.trajectoryBuilder(traj3.end())
                 .addTemporalMarker(-0.8,()->{felipe.thumbOpen();})
@@ -303,9 +316,11 @@ public class RedWarehouselAutoMeet2 extends LinearOpMode {
                     felipe.liftRise();
                     drive.followTrajectory(traj1);
                     //drive.turn(Math.toRadians(-180));
-                    drive.followTrajectory(traj2);
+                    //drive.followTrajectory(traj2);
+                    drive.followTrajectory(traj4);
                     drive.followTrajectory(traj3);
-                    //drive.followTrajectory(traj4);
+                    drive.followTrajectory(traj5);
+                    drive.followTrajectory(traj6);
 
                     //drive.followTrajectory(traj5);
                     felipe.liftLoad();

@@ -21,6 +21,7 @@ import org.firstinspires.ftc.teamcode.Enums.PatrickState;
 import org.firstinspires.ftc.teamcode.Subsystems.CarouselTurnerThingy;
 import org.firstinspires.ftc.teamcode.Subsystems.Felipe;
 import org.firstinspires.ftc.teamcode.Subsystems.FelipeDeux;
+import org.firstinspires.ftc.teamcode.Teleop.PoseStorage;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 
 import static org.firstinspires.ftc.teamcode.Enums.Alliance.BLUE;
@@ -313,6 +314,7 @@ public class BlueCarouselAutoMeet2 extends LinearOpMode {
         telemetry.update();
 
         while (!isStopRequested() && opModeIsActive()) ;
+        PoseStorage.currentPose = drive.getPoseEstimate();
     }
 
     public void initVuforia() {
@@ -343,4 +345,5 @@ public class BlueCarouselAutoMeet2 extends LinearOpMode {
         tfod = ClassFactory.getInstance().createTFObjectDetector(tfodParameters, vuforia);
         tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABELS);
     }
+
 }
