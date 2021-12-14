@@ -174,24 +174,24 @@ public class TeleopMeet2 extends LinearOpMode {
              * Gamepad #1 DPAD Felipe Controls (setting the States)
              *
              **/
-            if (gamepad1.dpad_left) {
+            if (gamepad2.dpad_left) {
                 liftPosition = LiftPosition.PARTIAL;
                 julioPosition = JulioPosition.LEFT90;
                 telemetry.addData("High Goal Left", "Complete");
                 telemetry.addData("Lift State",liftPosition);
                 telemetry.addData("Arm State", julioPosition);
             }
-            if (gamepad1.dpad_right) {
+            if (gamepad2.dpad_right) {
                 liftPosition = LiftPosition.PARTIAL;
                 julioPosition = JulioPosition.RIGHT90;
                 telemetry.addData("High Goal Right","Complete");
             }
-            if (gamepad1.dpad_down) {//this one works
+            if (gamepad2.dpad_down) {//this one works
                 julioPosition = JulioPosition.CENTER;
                 liftPosition = LiftPosition.LOAD;
             }
 
-            if (gamepad1.dpad_up) {//this one works
+            if (gamepad2.dpad_up) {//this one works
                 liftPosition = LiftPosition.UP;
             }
 
@@ -267,7 +267,7 @@ public class TeleopMeet2 extends LinearOpMode {
              * Gamepad #2  - DPAD       *
              **/
 
-
+/*
             if (gamepad2.dpad_left) {
                 liftPosition = LiftPosition.PARTIAL;
                 julioPosition = JulioPosition.LEFT45;
@@ -288,7 +288,7 @@ public class TeleopMeet2 extends LinearOpMode {
             if (gamepad2.dpad_up) {//this one works
                 liftPosition = LiftPosition.UP;
             }
-
+*/
             /////////////////////////////////////////////////////////////////////////
             //States and Trasnitions//////////////////////////////////////////////
             if  (liftPosition == LiftPosition.PARTIAL && julioPosition == JulioPosition.LEFT90) {// where we need to go
