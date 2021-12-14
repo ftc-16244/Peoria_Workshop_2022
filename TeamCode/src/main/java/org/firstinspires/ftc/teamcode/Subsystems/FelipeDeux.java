@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.Subsystems;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -17,7 +18,7 @@ public class FelipeDeux {
 
     public DcMotor  linearActuator   = null;
     public DcMotor  patrickIntake    = null; // no longer used
-    public DcMotor  julioArm         = null; // new
+    public DcMotorEx julioArm         = null; // new
     public Servo    homieBox         = null;
     public Servo    cristianoCodo    = null; //arm
     public Servo    panchoPulgar     = null; //thumb
@@ -109,23 +110,29 @@ public class FelipeDeux {
         patrickIntake.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         // Initialize Julio the rotating arm to deliver Homie to the sides
-        julioArm = hwMap.get(DcMotor.class,"julioArm");
+        julioArm = hwMap.get(DcMotorEx.class,"julioArm");
         julioArm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         julioArm.setDirection(DcMotor.Direction.FORWARD);
         julioArm.setDirection(DcMotor.Direction.FORWARD);
+        julioArm.setZeroPowerBehavior(BRAKE);
         julioArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         // Initialize Homie the servo that rotates the freight capture bucket
         homieBox = hwMap.get(Servo.class,"homieBox");
 
-        // pre-position during init
-        homieBox.setPosition(HOMIEBOXPIVOTCENTER);
-
+        // Initialize the aux arm for preloaded box
         cristianoCodo = hwMap.get(Servo.class,"arm");
+
+        // Initialize the aux thumb for preloaded box
+        panchoPulgar = hwMap.get(Servo.class,"thumb");
+
+        // pre-position servos
+        homieBox.setPosition(HOMIEBOXPIVOTCENTER);
+        panchoPulgar.setPosition(PANCHOPULGARCLOSE);
         cristianoCodo.setPosition(CRISTIANOCODOINIT);
 
-        panchoPulgar = hwMap.get(Servo.class,"thumb");
-        panchoPulgar.setPosition(PANCHOPULGARCLOSE);
+        // get motor detaisl
+        julioArm.getPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION);
 
     }
 
