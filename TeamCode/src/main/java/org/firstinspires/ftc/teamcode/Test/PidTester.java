@@ -1,12 +1,15 @@
 package org.firstinspires.ftc.teamcode.Test;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import org.firstinspires.ftc.teamcode.Subsystems.CarouselTurnerThingy;
 import org.firstinspires.ftc.teamcode.Subsystems.FelipeTrois;
-
-class PidTester extends LinearOpMode {
+@TeleOp(group = "Test")
+//@Disabled
+public class PidTester extends LinearOpMode {
 
 
     // our DC motor.
@@ -47,11 +50,11 @@ class PidTester extends LinearOpMode {
         // display info to user.
         while(opModeIsActive()) {
             telemetry.addData("Runtime", "%.03f", getRuntime());
-            telemetry.addData("P,I,D (orig)", "%.04f, %.04f, %.0f, %.04f",
+            telemetry.addData("P,I,D (orig)", "%.04f, %.04f, %.04f, %.04f",
                     pidfOrig.p, pidfOrig.i, pidfOrig.d, pidfOrig.f);
             telemetry.addData("P,I,D,F (modified)", "%.04f, %.04f, %.04f, %.04f",
-                    pidModified.p, pidModified.i, pidModified.d);
-            telemetry.addData("Encoder Tolerance", tol);
+                    pidModified.p, pidModified.i, pidModified.d, pidModified.f);
+            telemetry.addData("Encoder Tolerance",  tol);
             telemetry.update();
         }
     }
