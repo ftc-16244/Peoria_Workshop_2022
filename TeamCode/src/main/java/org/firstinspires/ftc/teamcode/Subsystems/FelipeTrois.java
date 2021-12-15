@@ -4,11 +4,13 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.Enums.LiftPosition;
 
+import static com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior.BRAKE;
 import static java.lang.Thread.sleep;
 
 public class FelipeTrois {
@@ -16,7 +18,7 @@ public class FelipeTrois {
     //Define Hardware Objects
 
 
-    public DcMotor  linearActuator   = null;
+    public DcMotorEx  linearActuator   = null;
     public DcMotor  patrickIntake    = null; // no longer used
     public DcMotorEx  julioArm         = null; // new
     public Servo    homieBox         = null;
@@ -77,6 +79,20 @@ public class FelipeTrois {
     public static final double      PATRICKINTAKEON = 0.7;
 
 
+    public static final double JULIO_NEW_P = 5; // 2.5
+    public static final double JULIO_NEW_I = 0.2;// 0.1
+    public static final double JULIO_NEW_D = 0.5; // 0.2
+    public static final double JULIO_NEW_F = 10; // 10
+
+    public static final double JUAN_NEW_P = 5; // 2.5
+    public static final double JUAN_NEW_I = 0.1;// 0.1
+    public static final double JUAN_NEW_D = 0.5; // 0.2
+    public static final double JUAN_NEW_F = 20; // 10
+
+    PIDFCoefficients pidJULIO_fNew = new PIDFCoefficients(JULIO_NEW_P, JULIO_NEW_I, JULIO_NEW_D, JULIO_NEW_F);
+    PIDFCoefficients pidJUAN_fNew = new PIDFCoefficients(JUAN_NEW_P, JUAN_NEW_I, JUAN_NEW_D, JUAN_NEW_F);
+
+
     LiftPosition liftPosition = LiftPosition.UNKNOWN;
 
 
@@ -90,10 +106,11 @@ public class FelipeTrois {
     public void init(HardwareMap hwMap)  {
 
         // Initialize Juan - Linear Actuator type of lift
-        linearActuator = hwMap.get(DcMotor.class,"juanLift");
+        linearActuator = hwMap.get(DcMotorEx.class,"juanLift");
         linearActuator.setDirection(DcMotor.Direction.FORWARD);
         linearActuator.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         linearActuator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        linearActuator.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidJUAN_fNew);
 
         //Initialize Patrick which is the intake drive motor
         patrickIntake = hwMap.get(DcMotor.class,"patrickIntake");
@@ -105,11 +122,11 @@ public class FelipeTrois {
         julioArm.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
         julioArm.setDirection(DcMotorEx.Direction.FORWARD);
         julioArm.setDirection(DcMotorEx.Direction.FORWARD);
-        //julioArm.setZeroPowerBehavior(BRAKE);
+        julioArm.setZeroPowerBehavior(BRAKE);
         julioArm.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+
         // get default PIDF values
-        julioArm.getPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER);
-        julioArm.getPIDFCoefficients(DcMotorEx.RunMode.RUN_TO_POSITION);
+       julioArm.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidJULIO_fNew);
 
 
         // Initialize Homie the servo that rotates the freight capture bucket
