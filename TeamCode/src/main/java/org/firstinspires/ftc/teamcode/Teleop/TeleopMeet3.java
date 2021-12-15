@@ -6,7 +6,6 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.Enums.HomieState;
 import org.firstinspires.ftc.teamcode.Enums.JulioPosition;
 import org.firstinspires.ftc.teamcode.Enums.LiftPosition;
 import org.firstinspires.ftc.teamcode.Enums.PatrickState;
@@ -24,7 +23,7 @@ import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
  * encoder localizer heading may be significantly off if the track width has not been tuned).
  */
 @TeleOp(group = "Test")
-public class TeleopMeet3_Test extends LinearOpMode {
+public class TeleopMeet3 extends LinearOpMode {
 
     FelipeTrois felipe = new FelipeTrois(this);
     //Felipe felipe = new Felipe(); // instantiate Felipe (the main implement)
@@ -37,7 +36,6 @@ public class TeleopMeet3_Test extends LinearOpMode {
     //DriveSpeedState  currDriveState;
     PatrickState patrickState = PatrickState.OFF;
     LiftPosition liftPosition = LiftPosition.UNKNOWN;
-    HomieState homiestate = HomieState.UNKNOWN;
 
     JulioPosition julioPosition = JulioPosition.CENTER; // states for Julio the Arm
 
@@ -51,13 +49,12 @@ public class TeleopMeet3_Test extends LinearOpMode {
         felipe.armInit();
         felipe.thumbClose();
 
-        double juanErrorMax = 10;
+        double juanErrorMax = 15;
         double juanError    = Math.abs(felipe.getJuanPosition() - felipe.JUANLIFTPARTIAL) ; //current - target
 
         // forces Juan to mechanical low stop and sets encoders to zero
         felipe.juanMechanicalReset();
         // this just changes the state. It does not drive any action
-
         liftPosition = LiftPosition.LOAD;
         ////////////////////////////////////////////////////////////////////////////////////////////
         // WAIT FOR MATCH TO START
@@ -66,7 +63,6 @@ public class TeleopMeet3_Test extends LinearOpMode {
         // opmode has to be active to get this method to work. So is won't work if you put it in the init part.
         // This lifts Juan so Hommie is not on the mat.
         felipe.liftLoad();
-
         // This is the while loop that everything goes inside of.
         // the first section controls the drive train via a roadrunner method
         while (!isStopRequested()) {
@@ -172,31 +168,7 @@ public class TeleopMeet3_Test extends LinearOpMode {
             }
 
 
-            /**
-             *
-             * Gamepad #1 DPAD Felipe Controls (setting the States)
-             *
-             **/
-            if (gamepad2.dpad_left) {
-                liftPosition = LiftPosition.PARTIAL;
-                julioPosition = JulioPosition.LEFT90;
-                telemetry.addData("High Goal Left", "Complete");
-                telemetry.addData("Lift State",liftPosition);
-                telemetry.addData("Arm State", julioPosition);
-            }
-            if (gamepad2.dpad_right) {
-                liftPosition = LiftPosition.PARTIAL;
-                julioPosition = JulioPosition.RIGHT90;
-                telemetry.addData("High Goal Right","Complete");
-            }
-            if (gamepad2.dpad_down) {//this one works
-                julioPosition = JulioPosition.CENTER;
-                liftPosition = LiftPosition.LOAD;
-            }
 
-            if (gamepad2.dpad_up) {//this one works
-                liftPosition = LiftPosition.UP;
-            }
 
 
 
@@ -207,17 +179,26 @@ public class TeleopMeet3_Test extends LinearOpMode {
              *
              **/
 
-           // This makes teh dump always dump regardless of arm position. No driver thiking needed
-            if (gamepad1.right_trigger > 0.25 & felipe.getJulioPosition() > felipe.JULIOARMLEFT45+10) {
-                felipe.hoimeDumpLeft();
+            if (gamepad1.right_trigger > 0.25 & felipe.getJulioPosition()<-50) {
+                felipe.homieRight();
+                sleep(500);
+                felipe.homieCenter();
+                sleep(500);
+                //debounce(400);
+                sleep(500);
+                felipe.homieCenter();
+                telemetry.addData("Homie Left", "Complete ");
 
+                //debounce(400);
             }
+            if (gamepad1.right_trigger > 0.25 & felipe.getJulioPosition()>50) {
+                felipe.homieLeft();
+                sleep(500);
+                felipe.homieCenter();
+                sleep(500);
 
-            if (gamepad1.right_trigger > 0.25 & felipe.getJulioPosition() > felipe.JULIOARMRIGHT45-10) {
-                felipe.hoimeDumpRight();
-
+                telemetry.addData("Homie Right", "Complete ");
             }
-
             /**
              *
              * Gamepad #1 Back Buttons
@@ -258,20 +239,19 @@ public class TeleopMeet3_Test extends LinearOpMode {
 
             /**
              *
-             * Gamepad #2  - DPAD       *
+             * Gamepad #2 DPAD Felipe Controls (setting the States)
+             *
              **/
-
-/*
             if (gamepad2.dpad_left) {
                 liftPosition = LiftPosition.PARTIAL;
-                julioPosition = JulioPosition.LEFT45;
+                julioPosition = JulioPosition.LEFT90;
                 telemetry.addData("High Goal Left", "Complete");
                 telemetry.addData("Lift State",liftPosition);
                 telemetry.addData("Arm State", julioPosition);
             }
             if (gamepad2.dpad_right) {
                 liftPosition = LiftPosition.PARTIAL;
-                julioPosition = JulioPosition.RIGHT45;
+                julioPosition = JulioPosition.RIGHT90;
                 telemetry.addData("High Goal Right","Complete");
             }
             if (gamepad2.dpad_down) {//this one works
@@ -282,7 +262,7 @@ public class TeleopMeet3_Test extends LinearOpMode {
             if (gamepad2.dpad_up) {//this one works
                 liftPosition = LiftPosition.UP;
             }
-*/
+
             /////////////////////////////////////////////////////////////////////////
             //States and Trasnitions//////////////////////////////////////////////
             if  (liftPosition == LiftPosition.PARTIAL && julioPosition == JulioPosition.LEFT90) {// where we need to go
@@ -298,8 +278,7 @@ public class TeleopMeet3_Test extends LinearOpMode {
                     felipe.linearActuator.setPower(Math.abs(felipe.JUANLIFTSPEED ));
                 }
                 //only after linear actuator reaches target height does the julio start moving
-                if( felipe.getJuanPosition() >= felipe.JUANLIFTPARTIAL && felipe.getJulioPosition() <  felipe.JULIOARMLEFT45-10 ){
-                    felipe.homieLeft();
+                if( felipe.getJuanPosition() >= felipe.JUANLIFTPARTIAL){
                     felipe.setJulioTo90Left();
                     felipe.julioArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     felipe.julioArm.setPower(Math.abs(felipe.JULIOTURNSPEED));
