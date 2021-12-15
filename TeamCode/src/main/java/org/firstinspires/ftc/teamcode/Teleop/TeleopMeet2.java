@@ -10,11 +10,11 @@ import org.firstinspires.ftc.teamcode.Enums.JulioPosition;
 import org.firstinspires.ftc.teamcode.Enums.LiftPosition;
 import org.firstinspires.ftc.teamcode.Enums.PatrickState;
 import org.firstinspires.ftc.teamcode.Subsystems.CarouselTurnerThingy;
+
 import org.firstinspires.ftc.teamcode.Subsystems.Felipe;
 import org.firstinspires.ftc.teamcode.Subsystems.FelipeDeux;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 
-import static org.firstinspires.ftc.teamcode.Enums.Alliance.BLUE;
 
 /**
  * This is a simple teleop routine for testing localization. Drive the robot around like a normal

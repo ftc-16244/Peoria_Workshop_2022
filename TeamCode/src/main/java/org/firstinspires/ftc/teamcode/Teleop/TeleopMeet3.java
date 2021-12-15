@@ -6,13 +6,14 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.Enums.HomieState;
 import org.firstinspires.ftc.teamcode.Enums.JulioPosition;
 import org.firstinspires.ftc.teamcode.Enums.LiftPosition;
 import org.firstinspires.ftc.teamcode.Enums.PatrickState;
 import org.firstinspires.ftc.teamcode.Subsystems.CarouselTurnerThingy;
 import org.firstinspires.ftc.teamcode.Subsystems.FelipeDeux;
+import org.firstinspires.ftc.teamcode.Subsystems.FelipeTrois;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
+
 
 /**
  * This is a simple teleop routine for testing localization. Drive the robot around like a normal
@@ -22,11 +23,11 @@ import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
  * encoder localizer heading may be significantly off if the track width has not been tuned).
  */
 @TeleOp(group = "Test")
-public class TeleopMeet2X extends LinearOpMode {
+public class TeleopMeet3 extends LinearOpMode {
 
-    FelipeDeux felipe = new FelipeDeux(this);
+    FelipeTrois felipe = new FelipeTrois(this);
+    //Felipe felipe = new Felipe(); // instantiate Felipe (the main implement)
     CarouselTurnerThingy carousel = new CarouselTurnerThingy();
-
     // init and setup
     ElapsedTime runtime = new ElapsedTime();
 
@@ -35,7 +36,6 @@ public class TeleopMeet2X extends LinearOpMode {
     //DriveSpeedState  currDriveState;
     PatrickState patrickState = PatrickState.OFF;
     LiftPosition liftPosition = LiftPosition.UNKNOWN;
-    HomieState homiestate = HomieState.UNKNOWN;
 
     JulioPosition julioPosition = JulioPosition.CENTER; // states for Julio the Arm
 
@@ -49,7 +49,7 @@ public class TeleopMeet2X extends LinearOpMode {
         felipe.armInit();
         felipe.thumbClose();
 
-        double juanErrorMax = 10;
+        double juanErrorMax = 15;
         double juanError    = Math.abs(felipe.getJuanPosition() - felipe.JUANLIFTPARTIAL) ; //current - target
 
         // forces Juan to mechanical low stop and sets encoders to zero
@@ -168,31 +168,7 @@ public class TeleopMeet2X extends LinearOpMode {
             }
 
 
-            /**
-             *
-             * Gamepad #1 DPAD Felipe Controls (setting the States)
-             *
-             **/
-            if (gamepad2.dpad_left) {
-                liftPosition = LiftPosition.PARTIAL;
-                julioPosition = JulioPosition.LEFT90;
-                telemetry.addData("High Goal Left", "Complete");
-                telemetry.addData("Lift State",liftPosition);
-                telemetry.addData("Arm State", julioPosition);
-            }
-            if (gamepad2.dpad_right) {
-                liftPosition = LiftPosition.PARTIAL;
-                julioPosition = JulioPosition.RIGHT90;
-                telemetry.addData("High Goal Right","Complete");
-            }
-            if (gamepad2.dpad_down) {//this one works
-                julioPosition = JulioPosition.CENTER;
-                liftPosition = LiftPosition.LOAD;
-            }
 
-            if (gamepad2.dpad_up) {//this one works
-                liftPosition = LiftPosition.UP;
-            }
 
 
 
@@ -203,8 +179,8 @@ public class TeleopMeet2X extends LinearOpMode {
              *
              **/
 
-            if (gamepad1.right_trigger > 0.25) {
-                felipe.homieLeft();
+            if (gamepad1.right_trigger > 0.25 & felipe.getJulioPosition()<-50) {
+                felipe.homieRight();
                 sleep(500);
                 felipe.homieCenter();
                 sleep(500);
@@ -215,8 +191,8 @@ public class TeleopMeet2X extends LinearOpMode {
 
                 //debounce(400);
             }
-            if (gamepad1.left_trigger > 0.25) {
-                felipe.homieRight();
+            if (gamepad1.right_trigger > 0.25 & felipe.getJulioPosition()>50) {
+                felipe.homieLeft();
                 sleep(500);
                 felipe.homieCenter();
                 sleep(500);
@@ -263,20 +239,19 @@ public class TeleopMeet2X extends LinearOpMode {
 
             /**
              *
-             * Gamepad #2  - DPAD       *
+             * Gamepad #2 DPAD Felipe Controls (setting the States)
+             *
              **/
-
-/*
             if (gamepad2.dpad_left) {
                 liftPosition = LiftPosition.PARTIAL;
-                julioPosition = JulioPosition.LEFT45;
+                julioPosition = JulioPosition.LEFT90;
                 telemetry.addData("High Goal Left", "Complete");
                 telemetry.addData("Lift State",liftPosition);
                 telemetry.addData("Arm State", julioPosition);
             }
             if (gamepad2.dpad_right) {
                 liftPosition = LiftPosition.PARTIAL;
-                julioPosition = JulioPosition.RIGHT45;
+                julioPosition = JulioPosition.RIGHT90;
                 telemetry.addData("High Goal Right","Complete");
             }
             if (gamepad2.dpad_down) {//this one works
@@ -287,7 +262,7 @@ public class TeleopMeet2X extends LinearOpMode {
             if (gamepad2.dpad_up) {//this one works
                 liftPosition = LiftPosition.UP;
             }
-*/
+
             /////////////////////////////////////////////////////////////////////////
             //States and Trasnitions//////////////////////////////////////////////
             if  (liftPosition == LiftPosition.PARTIAL && julioPosition == JulioPosition.LEFT90) {// where we need to go
