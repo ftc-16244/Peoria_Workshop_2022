@@ -9,16 +9,16 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.Enums.LiftPosition;
 
-import static com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior.BRAKE;
+import static java.lang.Thread.sleep;
 
-public class FelipeDeux {
+public class FelipeTrois {
 
     //Define Hardware Objects
 
 
     public DcMotor  linearActuator   = null;
     public DcMotor  patrickIntake    = null; // no longer used
-    public DcMotor  julioArm         = null; // new
+    public DcMotorEx  julioArm         = null; // new
     public Servo    homieBox         = null;
     public Servo    cristianoCodo    = null; //arm
     public Servo    panchoPulgar     = null; //thumb
@@ -81,7 +81,8 @@ public class FelipeDeux {
 
 
     LinearOpMode opmode;
-    public FelipeDeux(LinearOpMode opmode) {
+
+    public FelipeTrois(LinearOpMode opmode) {
         this.opmode = opmode;
     }
 
@@ -101,11 +102,15 @@ public class FelipeDeux {
 
         // Initialize Julio the rotating arm to deliver Homie to the sides
         julioArm = hwMap.get(DcMotorEx.class,"julioArm");
-        julioArm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        julioArm.setDirection(DcMotor.Direction.FORWARD);
-        julioArm.setDirection(DcMotor.Direction.FORWARD);
+        julioArm.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        julioArm.setDirection(DcMotorEx.Direction.FORWARD);
+        julioArm.setDirection(DcMotorEx.Direction.FORWARD);
         //julioArm.setZeroPowerBehavior(BRAKE);
-        julioArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        julioArm.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        // get default PIDF values
+        julioArm.getPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        julioArm.getPIDFCoefficients(DcMotorEx.RunMode.RUN_TO_POSITION);
+
 
         // Initialize Homie the servo that rotates the freight capture bucket
         homieBox = hwMap.get(Servo.class,"homieBox");
@@ -235,6 +240,22 @@ public class FelipeDeux {
     }
 
     //Homie the box's methods
+    public void hoimeDumpLeft() throws InterruptedException {
+        homieRight();
+        sleep(500);
+        homieCenter();
+        sleep(500);
+
+    }
+
+    public void hoimeDumpRight() throws InterruptedException {
+        homieLeft();
+        sleep(500);
+        homieCenter();
+        sleep(500);
+
+    }
+
     public void homieRight() {
         homieBox.setPosition(HOMIEBOXPIVOTRIGHT);
     }
