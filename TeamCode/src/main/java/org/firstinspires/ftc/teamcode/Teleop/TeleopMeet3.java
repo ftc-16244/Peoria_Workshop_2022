@@ -74,13 +74,13 @@ public class TeleopMeet3 extends LinearOpMode {
                     )
             );
 
-            drive.update();
+
 
             Pose2d poseEstimate = drive.getPoseEstimate();
             telemetry.addData("x", poseEstimate.getX());
             telemetry.addData("y", poseEstimate.getY());
             telemetry.addData("heading", poseEstimate.getHeading());
-            telemetry.update();
+
 
             //////////////////////////////////////////////
             // Gampepad 1 Functions///////////////////////
@@ -187,18 +187,33 @@ public class TeleopMeet3 extends LinearOpMode {
                 //debounce(400);
                 sleep(500);
                 felipe.homieCenter();
-                telemetry.addData("Homie Left", "Complete ");
-
-                //debounce(400);
+                telemetry.addData("Homie Dump Left", "Complete ");
             }
+
             if (gamepad1.right_trigger > 0.25 & felipe.getJulioPosition()>50) {
                 felipe.homieLeft();
                 sleep(500);
                 felipe.homieCenter();
                 sleep(500);
+                telemetry.addData("Homie Dump Right", "Complete ");
 
-                telemetry.addData("Homie Right", "Complete ");
+
             }
+
+            if (gamepad1.left_trigger > 0.25 && julioPosition == JulioPosition.RIGHT90 &&
+                    felipe.getJuanPosition() >= felipe.JUANLIFTPARTIAL) {
+                felipe.homieRight();
+
+            }
+
+            if (gamepad1.left_trigger > 0.25 && julioPosition == JulioPosition.LEFT90 &&
+                    felipe.getJuanPosition() >= felipe.JUANLIFTPARTIAL) {
+                felipe.homieLeft();
+
+            }
+
+
+
             /**
              *
              * Gamepad #1 Back Buttons
@@ -286,7 +301,7 @@ public class TeleopMeet3 extends LinearOpMode {
 
                 telemetry.addData("Lift State",  liftPosition);
                 telemetry.addData("Lift Position (inches)", felipe.getJuanPosition());
-                telemetry.update();
+
             }
 
 
@@ -313,7 +328,7 @@ public class TeleopMeet3 extends LinearOpMode {
 
                 telemetry.addData("Lift State",  liftPosition);
                 telemetry.addData("Lift Position (inches)", felipe.getJuanPosition());
-                telemetry.update();
+
             }
 
 
@@ -383,7 +398,7 @@ public class TeleopMeet3 extends LinearOpMode {
 
                 telemetry.addData("Lift State",  liftPosition);
                 telemetry.addData("Lift Position (inches)", felipe.getJuanPosition());
-                telemetry.update();
+
             }
 
 
@@ -410,7 +425,7 @@ public class TeleopMeet3 extends LinearOpMode {
 
                 telemetry.addData("Lift State",  liftPosition);
                 telemetry.addData("Lift Position (inches)", felipe.getJuanPosition());
-                telemetry.update();
+
             }
 
 
