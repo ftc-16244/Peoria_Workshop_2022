@@ -62,11 +62,11 @@ public class FreightFrenzyTSEPipeline_EXP extends OpenCvPipeline{
 
         // ROI's for the Blue Carousel where we line up in front of the left and center bar codes
         Rect LEFT_ROI_A = new Rect(
-                new Point(20, 115),
-                new Point(80, 155));
+                new Point(40, 115),
+                new Point(100, 155));
         Rect RIGHT_ROI_A = new Rect(
-                new Point(180, 115),
-                new Point(240, 155));
+                new Point(200, 115),
+                new Point(260, 155));
 
         // ROI's for the Red Carousel where we line up in front of the center and right bar codes
         Rect LEFT_ROI_B = new Rect(
