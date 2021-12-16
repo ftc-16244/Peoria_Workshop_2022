@@ -62,16 +62,16 @@ public class FreightFrenzyTSEPipeline_EXP extends OpenCvPipeline{
 
         // ROI's for the Blue Carousel where we line up in front of the left and center bar codes
         Rect LEFT_ROI_A = new Rect(
-                new Point(20, 115),
-                new Point(80, 155));
+                new Point(60, 100),
+                new Point(120, 140));
         Rect RIGHT_ROI_A = new Rect(
-                new Point(180, 115),
-                new Point(240, 155));
+                new Point(210, 100),
+                new Point(270, 140));
 
         // ROI's for the Red Carousel where we line up in front of the center and right bar codes
         Rect LEFT_ROI_B = new Rect(
-                new Point(20, 115),
-                new Point(80, 155));
+                new Point(0, 115),
+                new Point(60, 155));
         Rect RIGHT_ROI_B = new Rect(
                 new Point(180, 115),
                 new Point(240, 155));
@@ -138,7 +138,7 @@ public class FreightFrenzyTSEPipeline_EXP extends OpenCvPipeline{
             } else if (TSERobotLeft) {
                 barcode = Barcode.LEFT;
                 telemetry.addData("TSE barcode locations is", "Left");
-            } else {
+            } else if (TSERobotRight){
                 barcode = Barcode.CENTER;
                 telemetry.addData("TSE barcode locations is", "Center");
             }
