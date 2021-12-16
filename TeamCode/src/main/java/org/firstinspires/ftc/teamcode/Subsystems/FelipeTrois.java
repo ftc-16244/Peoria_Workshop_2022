@@ -18,12 +18,12 @@ public class FelipeTrois {
     //Define Hardware Objects
 
 
-    public DcMotorEx  linearActuator   = null;
-    public DcMotor  patrickIntake    = null; // no longer used
-    public DcMotorEx  julioArm         = null; // new
-    public Servo    homieBox         = null;
-    public Servo    cristianoCodo    = null; //arm
-    public Servo    panchoPulgar     = null; //thumb
+    public DcMotorEx    linearActuator   = null;
+    public DcMotor      patrickIntake    = null; // no longer used
+    public DcMotorEx    julioArm         = null; // new
+    public Servo        homieBox         = null;
+    public Servo        cristianoCodo    = null; //arm
+    public Servo        panchoPulgar     = null; //thumb
 
     // Need some features from the Linear Opmode to make the lift work
 
@@ -40,14 +40,6 @@ public class FelipeTrois {
     private static final double     TICKS_PER_MOTOR_REV         =   145.1; // goBilda 1150 RPM motor
     private static final double     ACTUATOR_DISTANCE_PER_REV   = 8/25.4; // 8mm of travel per rev converted to inches
     public static final double      TICKS_PER_LIFT_IN           = TICKS_PER_MOTOR_REV / ACTUATOR_DISTANCE_PER_REV; // 460 and change
-
-
-    //public static final double      linearActuatorSPEED         =   0.9; // if this is too fast you cannot reset without hitting the framwe
-    //public static final int         linearActuatorDOWN          =   0;
-    //public static final int         linearActuatorPARTIAL       =   5;
-    //public static final int         linearActuatorUP            =   7; //Number is in inches
-    //public static final double      linearActuatorLOAD          =  .75; //Number is in inches
-
 
     public static final double      CRISTIANOCODOINIT =  0.18;
     public static final double      CRISTIANOCODOMID =  0.5;
