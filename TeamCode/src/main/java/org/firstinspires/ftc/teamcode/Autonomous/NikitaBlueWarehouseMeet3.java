@@ -81,16 +81,14 @@ public class NikitaBlueWarehouseMeet3 extends LinearOpMode {
 
         ///////////////////////////////////////////////////////////////////////////
         Trajectory  traj5 = drive.trajectoryBuilder(new Pose2d())
-                .lineToLinearHeading(new Pose2d(41,3,Math.toRadians(0)))
+                .lineToLinearHeading(new Pose2d(39,3,Math.toRadians(0)))
                 .addTemporalMarker(-.25,()->{felipe.armLow();})
-                //.addTemporalMarker(-.25,()->{felipe.liftRise();})
                 .build();
         Trajectory  traj6 = drive.trajectoryBuilder(traj5.end())
                 .addTemporalMarker(-0.6,()->{felipe.thumbOpen();})
                 .addTemporalMarker(.1,()->{felipe.thumbClose();})
                 .addTemporalMarker(.5,()->{felipe.armInit();})
                 .build();
-
 
         waitForStart();
         felipe.liftLoad();// put here becase opmode is acitve is a condition in the method that does this
