@@ -136,13 +136,13 @@ public class FreightFrenzyTSEPipeline_EXP extends OpenCvPipeline{
 
             if (!TSERobotLeft && !TSERobotRight) {
                 barcode = Barcode.RIGHT;
-                telemetry.addData("TSE barcode locations is", "Right");
+                telemetry.addData("TSE barcode locations is", barcode);
             } else if (TSERobotLeft) {
                 barcode = Barcode.LEFT;
-                telemetry.addData("TSE barcode locations is", "Left");
+                telemetry.addData("TSE barcode locations is", barcode);
             } else if (TSERobotRight){
                 barcode = Barcode.CENTER;
-                telemetry.addData("TSE barcode locations is", "Center");
+                telemetry.addData("TSE barcode locations is", barcode);
             }
         }
 

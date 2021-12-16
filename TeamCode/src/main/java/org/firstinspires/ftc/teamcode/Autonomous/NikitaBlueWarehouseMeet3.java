@@ -80,37 +80,16 @@ public class NikitaBlueWarehouseMeet3 extends LinearOpMode {
         felipe.juanMechanicalReset();
 
         ///////////////////////////////////////////////////////////////////////////
-        // Trajectories - HIGH GOAL
-        ///////////////////////////////////////////////////////////////////////////
-        Trajectory  traj1 = drive.trajectoryBuilder(new Pose2d())
-                .forward(15)
+        Trajectory  traj5 = drive.trajectoryBuilder(new Pose2d())
+                .lineToLinearHeading(new Pose2d(41,3,Math.toRadians(179)))
+                .addTemporalMarker(-.25,()->{felipe.armLow();})
+                //.addTemporalMarker(-.25,()->{felipe.liftRise();})
                 .build();
-
-        Trajectory  traj2 = drive.trajectoryBuilder(traj1.end().plus(new Pose2d(0,0,Math.toRadians(90))))
-                .back(19)
-                .build();
-
-        Trajectory traj3 = drive.trajectoryBuilder(traj2.end())
-                .addTemporalMarker(0.25,()->{felipe.armMid();})
-                .strafeRight(14)
-
-                .build();
-        // Move away from the alliance shipping hub so the arm can be retracted without hitting the hub
-        Trajectory traj4 = drive.trajectoryBuilder(traj3.end())
-                .addTemporalMarker(-0.8,()->{felipe.thumbOpen();})
-                .addTemporalMarker(1,()->{felipe.thumbClose();})
-                .addTemporalMarker(1.5,()->{felipe.armInit();})
-                .strafeLeft(8.5)
-
-                .build();
-        Trajectory traj5 = drive.trajectoryBuilder(traj4.end())
-                .forward(20)
-                .build();
-        Trajectory traj6 = drive.trajectoryBuilder(traj5.end().plus(new Pose2d(0,0,Math.toRadians(-180))))
-                .strafeRight(20)
-                .build();
-        Trajectory traj7 = drive.trajectoryBuilder(traj6.end().plus(new Pose2d(0,0,Math.toRadians(0))))
-                .forward(35)
+        Trajectory  traj6 = drive.trajectoryBuilder(traj5.end())
+                .addTemporalMarker(-0.6,()->{felipe.thumbOpen();})
+                .addTemporalMarker(.1,()->{felipe.thumbClose();})
+                .addTemporalMarker(.5,()->{felipe.armInit();})
+                .lineToLinearHeading(new Pose2d(9,-30,Math.toRadians(-180)))
                 .build();
 
 
@@ -120,49 +99,19 @@ public class NikitaBlueWarehouseMeet3 extends LinearOpMode {
 
             switch(detector.getLocation()){
                 case LEFT: //
-                    felipe.liftRise();
-                    drive.followTrajectory(traj1);
-                    drive.turn(Math.toRadians(90));
-                    drive.followTrajectory(traj2);
-                    drive.followTrajectory(traj3);
-                    drive.followTrajectory(traj4);
-
                     drive.followTrajectory(traj5);
-                    felipe.liftLoad();
-                    drive.turn(Math.toRadians(180));
-
                     drive.followTrajectory(traj6);
-                    drive.followTrajectory(traj7);
-
+                    felipe.liftLoad();
                     break;
 
                 case CENTER: //
-                    felipe.liftRise();
-                    drive.followTrajectory(traj1);
-                    drive.turn(Math.toRadians(90));
-                    drive.followTrajectory(traj2);
-                    drive.followTrajectory(traj3);
-                    drive.followTrajectory(traj4);
 
-                    drive.followTrajectory(traj5);
-                    felipe.liftLoad();
-                    drive.turn(Math.toRadians(180));
-                    drive.followTrajectory(traj6);
 
                     break;
 
                 case RIGHT: //level 3 highest goal
-                    felipe.liftRise();
-                    drive.followTrajectory(traj1);
-                    drive.turn(Math.toRadians(180));
-                    drive.followTrajectory(traj2);
-                    drive.followTrajectory(traj3);
-                    drive.followTrajectory(traj4);
 
-                    drive.followTrajectory(traj5);
-                    felipe.liftLoad();
-                    drive.turn(Math.toRadians(90));
-                    drive.followTrajectory(traj6);
+
 
                     break;
             }
