@@ -89,7 +89,6 @@ public class NikitaBlueWarehouseMeet3 extends LinearOpMode {
                 .addTemporalMarker(-0.6,()->{felipe.thumbOpen();})
                 .addTemporalMarker(.1,()->{felipe.thumbClose();})
                 .addTemporalMarker(.5,()->{felipe.armInit();})
-                .lineToLinearHeading(new Pose2d(9,-30,Math.toRadians(0)))
                 .build();
 
 
