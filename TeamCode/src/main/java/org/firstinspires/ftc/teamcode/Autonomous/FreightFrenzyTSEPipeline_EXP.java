@@ -148,7 +148,7 @@ public class FreightFrenzyTSEPipeline_EXP extends OpenCvPipeline{
 
         // // This is the red carosel blue warehouse case
         if((alliance == Alliance.RED & startside == StartSide.CAROUSEL) ||
-                (alliance == Alliance.BLUE & startside == StartSide.WAREHOUSE)){
+                (alliance == Alliance.BLUE & startside == StartSide.WAREHOUSE)) {
 
             if (!TSERobotLeft && !TSERobotRight) {
                 barcode = Barcode.LEFT;
@@ -156,7 +156,7 @@ public class FreightFrenzyTSEPipeline_EXP extends OpenCvPipeline{
             } else if (TSERobotLeft) {
                 barcode = Barcode.CENTER;
                 telemetry.addData("TSE barcode locations is", "Left");
-            } else {
+            } else if (TSERobotRight){
                 barcode = Barcode.RIGHT;
                 telemetry.addData("TSE barcode locations is", "Center");
             }
