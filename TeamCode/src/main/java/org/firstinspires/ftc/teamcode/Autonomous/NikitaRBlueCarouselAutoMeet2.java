@@ -19,6 +19,7 @@ import org.firstinspires.ftc.teamcode.Enums.StartSide;
 import org.firstinspires.ftc.teamcode.Subsystems.CarouselTurnerThingy;
 import org.firstinspires.ftc.teamcode.Subsystems.FelipeDeux;
 
+import org.firstinspires.ftc.teamcode.Subsystems.FelipeTrois;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
