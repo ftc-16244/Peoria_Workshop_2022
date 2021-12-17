@@ -81,14 +81,20 @@ public class NikitaBlueWarehouseMeet3 extends LinearOpMode {
 
         ///////////////////////////////////////////////////////////////////////////
         Trajectory  traj5 = drive.trajectoryBuilder(new Pose2d())
-                .lineToLinearHeading(new Pose2d(39,-4,Math.toRadians(0)))
+                .lineToLinearHeading(new Pose2d(38,-3,Math.toRadians(0)))
                 .addTemporalMarker(-.25,()->{felipe.armLow();})
                 .build();
         Trajectory  traj6 = drive.trajectoryBuilder(traj5.end())
                 .addTemporalMarker(-0.6,()->{felipe.thumbOpen();})
-                .addTemporalMarker(.1,()->{felipe.thumbClose();})
-                .addTemporalMarker(.5,()->{felipe.armInit();})
+                .addTemporalMarker(.5,()->{felipe.thumbClose();})
+                .addTemporalMarker(.7,()->{felipe.armInit();})
                 .lineToLinearHeading(new Pose2d(-4,2,Math.toRadians(90)))
+                .build();
+        Trajectory  traj7 = drive.trajectoryBuilder(traj6.end())
+                .forward(30)
+                .build();
+        Trajectory  traj8 = drive.trajectoryBuilder(traj7.end())
+                .strafeRight(14)
                 .build();
 
         waitForStart();
@@ -99,6 +105,8 @@ public class NikitaBlueWarehouseMeet3 extends LinearOpMode {
                 case LEFT: //
                     drive.followTrajectory(traj5);
                     drive.followTrajectory(traj6);
+                    drive.followTrajectory(traj7);
+                    drive.followTrajectory(traj8);
                     felipe.liftLoad();
                     break;
 
