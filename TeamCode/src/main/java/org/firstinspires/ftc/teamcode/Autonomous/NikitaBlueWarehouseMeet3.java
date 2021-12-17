@@ -81,7 +81,7 @@ public class NikitaBlueWarehouseMeet3 extends LinearOpMode {
 
         ///////////////////////////////////////////////////////////////////////////
         Trajectory  traj5 = drive.trajectoryBuilder(new Pose2d())
-                .lineToLinearHeading(new Pose2d(38,-3,Math.toRadians(0)))
+                .lineToLinearHeading(new Pose2d(37,-3,Math.toRadians(0)))
                 .addTemporalMarker(-.25,()->{felipe.armLow();})
                 .build();
         Trajectory  traj6 = drive.trajectoryBuilder(traj5.end())
@@ -94,7 +94,7 @@ public class NikitaBlueWarehouseMeet3 extends LinearOpMode {
                 .forward(30)
                 .build();
         Trajectory  traj8 = drive.trajectoryBuilder(traj7.end())
-                .strafeRight(14)
+                .strafeRight(18)
                 .build();
 
         waitForStart();
