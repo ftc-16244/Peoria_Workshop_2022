@@ -115,6 +115,7 @@ public class NikitaBlueWarehouseMeet3 extends LinearOpMode {
                 .strafeRight(25)
                 .build();
 
+
         waitForStart();
         felipe.liftLoad();// put here becase opmode is acitve is a condition in the method that does this
         tfTime.reset(); //  reset the TF timer
@@ -138,7 +139,12 @@ public class NikitaBlueWarehouseMeet3 extends LinearOpMode {
                     break;
 
                 case RIGHT: //level 3 highest goal
-
+                    felipe.liftRise();
+                    drive.followTrajectory(traj1mid);
+                    drive.followTrajectory(traj2mid);
+                    drive.followTrajectory(traj3mid);
+                    drive.followTrajectory(traj4mid);
+                    felipe.liftLoad();
 
 
                     break;
