@@ -48,7 +48,7 @@ public class FelipeDeux {
 
 
     public static final double      CRISTIANOCODOINIT =  0.18;
-    public static final double      CRISTIANOCODOMID =  0.5;
+    public static final double      CRISTIANOCODOMID =  0.45;
     public static final double      CRISTIANOCODOLOW =  0.7;
 
     public static final double      PANCHOPULGAROPEN =  0.2;
