@@ -71,14 +71,14 @@ public class FelipeTrois {
     public static final double      PATRICKINTAKEON = 0.7;
 
 
-    public static final double JULIO_NEW_P = 5; // 2.5
-    public static final double JULIO_NEW_I = 0.2;// 0.1
+    public static final double JULIO_NEW_P = 10; // 2.5
+    public static final double JULIO_NEW_I = 0.5;// 0.1
     public static final double JULIO_NEW_D = 0.5; // 0.2
     public static final double JULIO_NEW_F = 10; // 10
 
     public static final double JUAN_NEW_P = 5; // 2.5
-    public static final double JUAN_NEW_I = 0.1;// 0.1
-    public static final double JUAN_NEW_D = 0.5; // 0.2
+    public static final double JUAN_NEW_I = 0.5;// 0.1
+    public static final double JUAN_NEW_D = 0.0; // 0.2
     public static final double JUAN_NEW_F = 20; // 10
 
     PIDFCoefficients pidJULIO_fNew = new PIDFCoefficients(JULIO_NEW_P, JULIO_NEW_I, JULIO_NEW_D, JULIO_NEW_F);
