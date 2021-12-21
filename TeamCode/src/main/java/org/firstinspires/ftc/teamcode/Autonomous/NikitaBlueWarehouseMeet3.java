@@ -80,20 +80,38 @@ public class NikitaBlueWarehouseMeet3 extends LinearOpMode {
         felipe.juanMechanicalReset();
 
         ///////////////////////////////////////////////////////////////////////////
-        Trajectory  traj5 = drive.trajectoryBuilder(new Pose2d())
+        Trajectory  traj1low = drive.trajectoryBuilder(new Pose2d())
                 .lineToLinearHeading(new Pose2d(37,-3,Math.toRadians(0)))
                 .addTemporalMarker(-.25,()->{felipe.armLow();})
                 .build();
-        Trajectory  traj6 = drive.trajectoryBuilder(traj5.end())
+        Trajectory  traj2low = drive.trajectoryBuilder(traj1low.end())
                 .addTemporalMarker(-0.6,()->{felipe.thumbOpen();})
                 .addTemporalMarker(.5,()->{felipe.thumbClose();})
                 .addTemporalMarker(.7,()->{felipe.armInit();})
                 .lineToLinearHeading(new Pose2d(-4,2,Math.toRadians(90)))
                 .build();
-        Trajectory  traj7 = drive.trajectoryBuilder(traj6.end())
+        Trajectory  traj3low = drive.trajectoryBuilder(traj2low.end())
                 .forward(30)
                 .build();
-        Trajectory  traj8 = drive.trajectoryBuilder(traj7.end())
+        Trajectory  traj4low = drive.trajectoryBuilder(traj3low.end())
+                .strafeRight(25)
+                .build();
+
+        //mid goal
+        Trajectory  traj1mid = drive.trajectoryBuilder(new Pose2d())
+                .lineToLinearHeading(new Pose2d(37,-3,Math.toRadians(0)))
+                .addTemporalMarker(-.25,()->{felipe.armMid();})
+                .build();
+        Trajectory  traj2mid = drive.trajectoryBuilder(traj1mid.end())
+                .addTemporalMarker(-0.6,()->{felipe.thumbOpen();})
+                .addTemporalMarker(.5,()->{felipe.thumbClose();})
+                .addTemporalMarker(.7,()->{felipe.armInit();})
+                .lineToLinearHeading(new Pose2d(-4,2,Math.toRadians(90)))
+                .build();
+        Trajectory  traj3mid = drive.trajectoryBuilder(traj2mid.end())
+                .forward(30)
+                .build();
+        Trajectory  traj4mid = drive.trajectoryBuilder(traj3mid.end())
                 .strafeRight(25)
                 .build();
 
@@ -103,15 +121,19 @@ public class NikitaBlueWarehouseMeet3 extends LinearOpMode {
 
             switch(detector.getLocation()){
                 case LEFT: //
-                    drive.followTrajectory(traj5);
-                    drive.followTrajectory(traj6);
-                    drive.followTrajectory(traj7);
-                    drive.followTrajectory(traj8);
+                    drive.followTrajectory(traj1low);
+                    drive.followTrajectory(traj2low);
+                    drive.followTrajectory(traj3low);
+                    drive.followTrajectory(traj4low);
                     felipe.liftLoad();
                     break;
 
                 case CENTER: //
-
+                    drive.followTrajectory(traj1mid);
+                    drive.followTrajectory(traj2mid);
+                    drive.followTrajectory(traj3mid);
+                    drive.followTrajectory(traj4mid);
+                    felipe.liftLoad();
 
                     break;
 
