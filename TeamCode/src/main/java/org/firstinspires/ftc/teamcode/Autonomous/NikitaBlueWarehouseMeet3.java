@@ -94,7 +94,7 @@ public class NikitaBlueWarehouseMeet3 extends LinearOpMode {
                 .forward(30)
                 .build();
         Trajectory  traj8 = drive.trajectoryBuilder(traj7.end())
-                .strafeRight(18)
+                .strafeRight(25)
                 .build();
 
         waitForStart();
