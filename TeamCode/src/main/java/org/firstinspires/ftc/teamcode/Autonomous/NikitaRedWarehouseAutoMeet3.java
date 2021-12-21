@@ -79,42 +79,6 @@ public class NikitaRedWarehouseAutoMeet3 extends LinearOpMode {
         carousel.init(hardwareMap);
         felipe.juanMechanicalReset();
 
-        ///////////////////////////////////////////////////////////////////////////
-        // Trajectories - HIGH GOAL
-        ///////////////////////////////////////////////////////////////////////////
-        Trajectory  traj1 = drive.trajectoryBuilder(new Pose2d())
-                .lineToLinearHeading(new Pose2d(42,3,Math.toRadians(179)))
-                .addTemporalMarker(-.25,()->{felipe.armMid();})
-                //.addTemporalMarker(-.25,()->{felipe.liftRise();})
-                .build();
-
-
-        /*Trajectory  traj1 = drive.trajectoryBuilder(new Pose2d())
-                .forward(15)
-                .build();*/
-
-        Trajectory  traj2 = drive.trajectoryBuilder(traj1.end())
-                .addTemporalMarker(-0.5,()->{felipe.thumbOpen();})
-                .forward(16)
-                .build();
-        Trajectory traj4 = drive.trajectoryBuilder(traj1.end())
-                .addTemporalMarker(-0.5,()->{felipe.thumbOpen();})
-                .addTemporalMarker(0.25,()->{felipe.armMid();})
-                .addTemporalMarker(1,()->{felipe.armInit();})
-                .addTemporalMarker(1,()->{felipe.thumbClose();})
-                .strafeLeft(4)
-                .build();
-        Trajectory traj3 = drive.trajectoryBuilder(traj4.end())
-                .lineToLinearHeading(new Pose2d(3,-5,Math.toRadians(-90)))
-                .build();
-
-        Trajectory traj5 = drive.trajectoryBuilder(traj3.end())
-                .forward(28)
-                .build();
-
-        Trajectory traj6 = drive.trajectoryBuilder(traj5.end())
-                .strafeLeft(22)
-                .build();
 
 
         waitForStart();
@@ -123,50 +87,17 @@ public class NikitaRedWarehouseAutoMeet3 extends LinearOpMode {
 
             switch(detector.getLocation()){
                 case LEFT: //
-                    felipe.liftRise();
-                    drive.followTrajectory(traj1);
-                    drive.turn(Math.toRadians(90));
-                    drive.followTrajectory(traj2);
-                    drive.followTrajectory(traj3);
-                    //drive.followTrajectory(traj4);
 
-                    // drive.followTrajectory(traj5);
-                    felipe.liftLoad();
-                    drive.turn(Math.toRadians(-180));
-
-                    //drive.followTrajectory(traj6);
 
                     break;
 
                 case CENTER: //
-                    felipe.liftRise();
-                    drive.followTrajectory(traj1);
-                    drive.turn(Math.toRadians(90));
-                    drive.followTrajectory(traj2);
-                    drive.followTrajectory(traj3);
-                    //drive.followTrajectory(traj4);
 
-                    //drive.followTrajectory(traj5);
-                    felipe.liftLoad();
-                    drive.turn(Math.toRadians(-180));
-                    //drive.followTrajectory(traj6);
 
                     break;
 
                 case RIGHT: //level 3 highest goal
-                    felipe.liftRise();
-                    drive.followTrajectory(traj1);
-                    //drive.turn(Math.toRadians(-180));
-                    //drive.followTrajectory(traj2);
-                    drive.followTrajectory(traj4);
-                    drive.followTrajectory(traj3);
-                    drive.followTrajectory(traj5);
-                    drive.followTrajectory(traj6);
 
-                    //drive.followTrajectory(traj5);
-                    felipe.liftLoad();
-                    //drive.turn(Math.toRadians(-90));
-                    //drive.followTrajectory(traj6);
 
 
                     break;
