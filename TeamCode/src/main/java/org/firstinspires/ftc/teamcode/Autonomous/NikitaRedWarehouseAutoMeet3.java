@@ -80,14 +80,14 @@ public class NikitaRedWarehouseAutoMeet3 extends LinearOpMode {
         felipe.juanMechanicalReset();
 
         Trajectory  traj1low = drive.trajectoryBuilder(new Pose2d())
-                .lineToLinearHeading(new Pose2d(37,-3,Math.toRadians(179)))
+                .lineToLinearHeading(new Pose2d(42,3,Math.toRadians(179)))
                 .addTemporalMarker(-.25,()->{felipe.armLow();})
                 .build();
         Trajectory  traj2low = drive.trajectoryBuilder(traj1low.end())
                 .addTemporalMarker(-0.6,()->{felipe.thumbOpen();})
                 .addTemporalMarker(.5,()->{felipe.thumbClose();})
                 .addTemporalMarker(.7,()->{felipe.armInit();})
-                .lineToLinearHeading(new Pose2d(-4,2,Math.toRadians(90)))
+                .lineToLinearHeading(new Pose2d(-4,-2,Math.toRadians(90)))
                 .build();
         Trajectory  traj3low = drive.trajectoryBuilder(traj2low.end())
                 .forward(30)
