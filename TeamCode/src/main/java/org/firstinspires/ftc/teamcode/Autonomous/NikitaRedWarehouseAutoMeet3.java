@@ -79,22 +79,73 @@ public class NikitaRedWarehouseAutoMeet3 extends LinearOpMode {
         carousel.init(hardwareMap);
         felipe.juanMechanicalReset();
 
-        Trajectory  traj1low = drive.trajectoryBuilder(new Pose2d())
+
+        //for high goal
+        Trajectory  traj1high = drive.trajectoryBuilder(new Pose2d())
                 .lineToLinearHeading(new Pose2d(42,3,Math.toRadians(179)))
-                .addTemporalMarker(-.25,()->{felipe.armLow();})
+                .addTemporalMarker(-.25,()->{felipe.armMid();})
                 .build();
-        Trajectory  traj2low = drive.trajectoryBuilder(traj1low.end())
+        Trajectory  traj2high = drive.trajectoryBuilder(traj1high.end())
                 .addTemporalMarker(-0.6,()->{felipe.thumbOpen();})
                 .addTemporalMarker(.5,()->{felipe.thumbClose();})
                 .addTemporalMarker(.7,()->{felipe.armInit();})
-                .lineToLinearHeading(new Pose2d(-4,-2,Math.toRadians(90)))
+                .lineToLinearHeading(new Pose2d(-4,-2,Math.toRadians(270)))
                 .build();
-        Trajectory  traj3low = drive.trajectoryBuilder(traj2low.end())
+        Trajectory  traj3high = drive.trajectoryBuilder(traj2high.end())
                 .forward(30)
                 .build();
-        Trajectory  traj4low = drive.trajectoryBuilder(traj3low.end())
-                .strafeRight(25)
+        Trajectory  traj4high = drive.trajectoryBuilder(traj3high.end())
+                .strafeLeft(25)
                 .build();
+
+        //for middle goal
+        Trajectory  traj1mid = drive.trajectoryBuilder(new Pose2d())
+                .lineToLinearHeading(new Pose2d(26,15,Math.toRadians(90)))
+                .addTemporalMarker(-.25,()->{felipe.armMid();})
+                .build();
+        Trajectory  traj2mid = drive.trajectoryBuilder(traj1mid.end())
+                .strafeLeft(3)
+                .addTemporalMarker(-0.6,()->{felipe.thumbOpen();})
+                .addTemporalMarker(.5,()->{felipe.thumbClose();})
+                .addTemporalMarker(.7,()->{felipe.armInit();})
+                .build();
+        Trajectory  traj3mid = drive.trajectoryBuilder(traj2mid.end())
+                .lineToLinearHeading(new Pose2d(17,12,Math.toRadians(-90)))
+                .build();
+        Trajectory  traj4mid = drive.trajectoryBuilder(traj3mid.end())
+                .lineToLinearHeading(new Pose2d(-4,-2,Math.toRadians(-90)))
+                .build();
+        Trajectory  traj5mid = drive.trajectoryBuilder(traj4mid.end())
+                .forward(29)
+                .build();
+        Trajectory  traj6mid = drive.trajectoryBuilder(traj5mid.end())
+                .strafeLeft(25)
+                .build();
+
+        //for low goal
+        Trajectory  traj1low = drive.trajectoryBuilder(new Pose2d())
+                .lineToLinearHeading(new Pose2d(26,15,Math.toRadians(90)))
+                .addTemporalMarker(-.25,()->{felipe.armLow();})
+                .build();
+        Trajectory  traj2low = drive.trajectoryBuilder(traj1low.end())
+                .strafeLeft(6)
+                .addTemporalMarker(-0.6,()->{felipe.thumbOpen();})
+                .addTemporalMarker(2,()->{felipe.thumbClose();})
+                .addTemporalMarker(.7,()->{felipe.armInit();})
+                .build();
+        Trajectory  traj3low = drive.trajectoryBuilder(traj2low.end())
+                .lineToLinearHeading(new Pose2d(17,12,Math.toRadians(-90)))
+                .build();
+        Trajectory  traj4low = drive.trajectoryBuilder(traj3low.end())
+                .lineToLinearHeading(new Pose2d(-4,-2,Math.toRadians(-90)))
+                .build();
+        Trajectory  traj5low = drive.trajectoryBuilder(traj4low.end())
+                .forward(29)
+                .build();
+        Trajectory  traj6low = drive.trajectoryBuilder(traj5low.end())
+                .strafeLeft(25)
+                .build();
+
 
 
 
@@ -108,18 +159,31 @@ public class NikitaRedWarehouseAutoMeet3 extends LinearOpMode {
                     drive.followTrajectory(traj2low);
                     drive.followTrajectory(traj3low);
                     drive.followTrajectory(traj4low);
+                    drive.followTrajectory(traj5low);
+                    drive.followTrajectory(traj6low);
                     felipe.liftLoad();
 
                     break;
 
                 case CENTER: //
-
+                    drive.followTrajectory(traj1mid);
+                    drive.followTrajectory(traj2mid);
+                    drive.followTrajectory(traj3mid);
+                    drive.followTrajectory(traj4mid);
+                    drive.followTrajectory(traj5mid);
+                    drive.followTrajectory(traj6mid);
+                    felipe.liftLoad();
 
                     break;
 
                 case RIGHT: //level 3 highest goal
 
-
+                    felipe.liftRise();
+                    drive.followTrajectory(traj1high);
+                    drive.followTrajectory(traj2high);
+                    drive.followTrajectory(traj3high);
+                    drive.followTrajectory(traj4high);
+                    felipe.liftLoad();
 
                     break;
             }
