@@ -18,7 +18,7 @@ public class FelipeTrois {
     //Define Hardware Objects
 
 
-    public DcMotorEx    linearActuator   = null;
+    public DcMotor    linearActuator   = null;
     public DcMotor      patrickIntake    = null; // no longer used
     public DcMotorEx    julioArm         = null; // new
     public Servo        homieBox         = null;
@@ -33,10 +33,10 @@ public class FelipeTrois {
     //Constants Lift
     public static final double      JUANLIFTSPEED               =   1.0; //
     //public static final int       JUANLIFTDOWN                =   0; // use the LOAD instead of down. Zero pushes wheels off the mat
-    public static final double      JUANLIFTPARTIAL             =   5.25;
+    public static final double      JUANLIFTPARTIAL             =   5.5;
     public static final int         JUANLIFTLOW                 =   2;
     public static final double      JUANLIFTUP                  =   7.0; //Number is in inches
-    public static final double      JUANLIFTLOAD                =   0.5; //Number is in inches
+    public static final double      JUANLIFTLOAD                =   0.3; //Number is in inches
     private static final double     TICKS_PER_MOTOR_REV         =   145.1; // goBilda 1150 RPM motor
     private static final double     ACTUATOR_DISTANCE_PER_REV   = 8/25.4; // 8mm of travel per rev converted to inches
     public static final double      TICKS_PER_LIFT_IN           = TICKS_PER_MOTOR_REV / ACTUATOR_DISTANCE_PER_REV; // 460 and change
@@ -98,11 +98,11 @@ public class FelipeTrois {
     public void init(HardwareMap hwMap)  {
 
         // Initialize Juan - Linear Actuator type of lift
-        linearActuator = hwMap.get(DcMotorEx.class,"juanLift");
+        linearActuator = hwMap.get(DcMotor.class,"juanLift");
         linearActuator.setDirection(DcMotor.Direction.FORWARD);
         linearActuator.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         linearActuator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        linearActuator.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidJUAN_fNew);
+        //linearActuator.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidJUAN_fNew);
 
         //Initialize Patrick which is the intake drive motor
         patrickIntake = hwMap.get(DcMotor.class,"patrickIntake");
@@ -114,7 +114,7 @@ public class FelipeTrois {
         julioArm.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
         julioArm.setDirection(DcMotorEx.Direction.FORWARD);
         julioArm.setDirection(DcMotorEx.Direction.FORWARD);
-        julioArm.setZeroPowerBehavior(BRAKE);
+       // julioArm.setZeroPowerBehavior(BRAKE);
         julioArm.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
 
         // get default PIDF values
