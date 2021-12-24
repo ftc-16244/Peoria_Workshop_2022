@@ -97,20 +97,20 @@ public class NikitaRedCarouselAutoMeet3 extends LinearOpMode {
                 .addTemporalMarker(-0.8,()->{felipe.thumbOpen();})
                 .addTemporalMarker(1,()->{felipe.thumbClose();})
                 .addTemporalMarker(1.5,()->{felipe.armInit();})
-                .lineToLinearHeading(new Pose2d(39,29,Math.toRadians(90)))
+                .lineToLinearHeading(new Pose2d(39,28,Math.toRadians(90)))
 
                 .build();
 
         Trajectory  traj2A = drive.trajectoryBuilder(traj2.end())
 
-                .lineToLinearHeading(new Pose2d(11,29,Math.toRadians(90)))
+                .lineToLinearHeading(new Pose2d(11,28,Math.toRadians(90)))
 
                 .build();
 
         Trajectory  traj3 = drive.trajectoryBuilder(traj2A.end())
                 // final touch up to engage carousel
-                .strafeLeft(6)
-                .addTemporalMarker(.25,()->{carousel.carouselTurnCWAuto();})
+                .strafeLeft(7)
+                .addTemporalMarker(1,()->{carousel.carouselTurnCWAuto();})
                 .build();
         Trajectory  traj4 = drive.trajectoryBuilder(traj3.end())
                 //back away but stay out of the wall to make it move better
@@ -126,13 +126,13 @@ public class NikitaRedCarouselAutoMeet3 extends LinearOpMode {
                 .addTemporalMarker(-0.6,()->{felipe.thumbOpen();})
                 .addTemporalMarker(.1,()->{felipe.thumbClose();})
                 .addTemporalMarker(.5,()->{felipe.armInit();})
-                .lineToLinearHeading(new Pose2d(9,-30,Math.toRadians(-180)))
+                .lineToLinearHeading(new Pose2d(9,-28,Math.toRadians(-180)))
 
                 .build();
         Trajectory  traj7 = drive.trajectoryBuilder(traj6.end())
                 // final touch up to engage carousel
                 .forward(5)
-                .addTemporalMarker(.25,()->{carousel.carouselTurnCCW();})
+                .addTemporalMarker(1,()->{carousel.carouselTurnCCW();})
                 .build();
         Trajectory  traj8 = drive.trajectoryBuilder(traj7.end())
                 //back away but stay out of the wall to make it move better
@@ -140,23 +140,52 @@ public class NikitaRedCarouselAutoMeet3 extends LinearOpMode {
                 .addTemporalMarker(.25,()->{carousel.carouselTurnOff();})
                 .build();
 
+        Trajectory  traj5low = drive.trajectoryBuilder(new Pose2d())
+                .lineToLinearHeading(new Pose2d(37,-2,Math.toRadians(0)))
+                .addTemporalMarker(-.25,()->{felipe.armLow();})
+                .build();
 
+        Trajectory  traj6low = drive.trajectoryBuilder(traj5low.end())
+                .addTemporalMarker(-0.8,()->{felipe.thumbOpen();})
+                .addTemporalMarker(1,()->{felipe.thumbClose();})
+                .addTemporalMarker(1.5,()->{felipe.armInit();})
+                .lineToLinearHeading(new Pose2d(39,29,Math.toRadians(90)))
+
+                .build();
+        Trajectory  traj7low = drive.trajectoryBuilder(traj6low.end())
+
+                .lineToLinearHeading(new Pose2d(11,29,Math.toRadians(90)))
+
+                .build();
+
+        Trajectory  traj8low = drive.trajectoryBuilder(traj7low.end())
+                // final touch up to engage carousel
+                .strafeLeft(7)
+                .addTemporalMarker(1,()->{carousel.carouselTurnCWAuto();})
+                .build();
+        Trajectory  traj9low = drive.trajectoryBuilder(traj8low.end())
+                //back away but stay out of the wall to make it move better
+                .lineToLinearHeading(new Pose2d(30,29,Math.toRadians(-90)))
+                .addTemporalMarker(.25,()->{carousel.carouselTurnOff();})
+                .build();
         waitForStart();
         felipe.liftLoad();// put here becase opmode is acitve is a condition in the method that does this
         tfTime.reset(); //  reset the TF timer
 
             switch(detector.getLocation()){
                 case LEFT: //
-                    drive.followTrajectory(traj5);
-                    drive.followTrajectory(traj6);
+                    drive.followTrajectory(traj5low);
+                    drive.followTrajectory(traj6low);
                     felipe.liftLoad();
-                    drive.followTrajectory(traj7);
+                    drive.followTrajectory(traj7low);
+                    drive.followTrajectory(traj8low);
+
 
                     //delay to let carousel turn
                     timer.reset();
                     while(timer.seconds() < ducktime) drive.update();
 
-                    drive.followTrajectory(traj8);
+                    drive.followTrajectory(traj9low);
 
                     break;
 

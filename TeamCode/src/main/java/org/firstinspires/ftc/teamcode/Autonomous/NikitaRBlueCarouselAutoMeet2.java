@@ -88,7 +88,7 @@ public class NikitaRBlueCarouselAutoMeet2 extends LinearOpMode {
         // Trajectories - HIGH GOAL
         ///////////////////////////////////////////////////////////////////////////
         Trajectory  traj_HG_01 = drive.trajectoryBuilder(new Pose2d())
-                .lineToLinearHeading(new Pose2d(42,3,Math.toRadians(179)))
+                .lineToLinearHeading(new Pose2d(44,3,Math.toRadians(179)))
                 .addTemporalMarker(-.25,()->{felipe.armMid();})
                 //.addTemporalMarker(-.25,()->{felipe.liftRise();})
                 .build();
