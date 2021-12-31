@@ -20,6 +20,7 @@ public class PidTester extends LinearOpMode {
     public static final double NEW_D = 0.2;
     public static final double NEW_F = 10;
     public int tol;
+    public int newtolerance = 3;
 
     public void runOpMode() {
         // get reference to DC motor.
@@ -46,6 +47,7 @@ public class PidTester extends LinearOpMode {
         PIDFCoefficients pidModified = felipe.julioArm.getPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER);
 
         tol = felipe.julioArm.getTargetPositionTolerance();
+        felipe.julioArm.setTargetPositionTolerance(newtolerance);
 
         // display info to user.
         while(opModeIsActive()) {
