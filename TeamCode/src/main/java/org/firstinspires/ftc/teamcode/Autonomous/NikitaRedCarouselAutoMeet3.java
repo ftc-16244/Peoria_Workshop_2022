@@ -88,7 +88,7 @@ public class NikitaRedCarouselAutoMeet3 extends LinearOpMode {
                 //.addTemporalMarker(-.25,()->{felipe.liftRise();})
                 .build();
         Trajectory  traj1 = drive.trajectoryBuilder(traj0.end())
-                .lineToLinearHeading(new Pose2d(39,-6,Math.toRadians(0)))
+                .lineToLinearHeading(new Pose2d(37,-5,Math.toRadians(0)))
                 .addTemporalMarker(.1,()->{felipe.armMid();})
                 //.addTemporalMarker(-.25,()->{felipe.liftRise();})
                 .build();
@@ -97,7 +97,7 @@ public class NikitaRedCarouselAutoMeet3 extends LinearOpMode {
                 .addTemporalMarker(-0.8,()->{felipe.thumbOpen();})
                 .addTemporalMarker(1,()->{felipe.thumbClose();})
                 .addTemporalMarker(1.5,()->{felipe.armInit();})
-                .lineToLinearHeading(new Pose2d(39,28,Math.toRadians(90)))
+                .lineToLinearHeading(new Pose2d(39,26,Math.toRadians(90)))
 
                 .build();
 

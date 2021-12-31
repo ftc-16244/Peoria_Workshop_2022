@@ -32,12 +32,12 @@ public class NikitaRedWarehouseAutoMeet3 extends LinearOpMode {
     OpenCvCamera webcam;
 
     public static double DISTANCE = 30; // in
-    public ElapsedTime   tfTime      = new ElapsedTime(); // timer for tensor flow
     FelipeDeux felipe = new FelipeDeux(this); // instantiate Felipe (the main implement)
     CarouselTurnerThingy carousel = new CarouselTurnerThingy();
     // init and setup
     ElapsedTime runtime = new ElapsedTime();
     Barcode barcode = Barcode.RIGHT; // Default target zone
+
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -73,7 +73,7 @@ public class NikitaRedWarehouseAutoMeet3 extends LinearOpMode {
 
 
         ElapsedTime timer = new ElapsedTime();
-        double ducktime = 2.5; // carosel rotation time
+        double delayTime = 10; // delay time
         // initialize the other subsystems
         felipe.init(hardwareMap);
         carousel.init(hardwareMap);
@@ -82,19 +82,22 @@ public class NikitaRedWarehouseAutoMeet3 extends LinearOpMode {
 
         //for high goal
         Trajectory  traj1high = drive.trajectoryBuilder(new Pose2d())
-                .lineToLinearHeading(new Pose2d(42,3,Math.toRadians(179)))
+                .lineToLinearHeading(new Pose2d(43,2,Math.toRadians(179)))
                 .addTemporalMarker(-.25,()->{felipe.armMid();})
                 .build();
         Trajectory  traj2high = drive.trajectoryBuilder(traj1high.end())
                 .addTemporalMarker(-0.6,()->{felipe.thumbOpen();})
                 .addTemporalMarker(.5,()->{felipe.thumbClose();})
                 .addTemporalMarker(.7,()->{felipe.armInit();})
-                .lineToLinearHeading(new Pose2d(-4,-2,Math.toRadians(270)))
+                .strafeLeft(4)
                 .build();
         Trajectory  traj3high = drive.trajectoryBuilder(traj2high.end())
-                .forward(30)
+                .lineToLinearHeading(new Pose2d(-4,-2,Math.toRadians(270)))
                 .build();
         Trajectory  traj4high = drive.trajectoryBuilder(traj3high.end())
+                .forward(30)
+                .build();
+        Trajectory  traj5high = drive.trajectoryBuilder(traj4high.end())
                 .strafeLeft(25)
                 .build();
 
@@ -151,10 +154,11 @@ public class NikitaRedWarehouseAutoMeet3 extends LinearOpMode {
 
         waitForStart();
         felipe.liftLoad();// put here becase opmode is acitve is a condition in the method that does this
-        tfTime.reset(); //  reset the TF timer
 
             switch(detector.getLocation()){
                 case LEFT: //
+                    timer.reset();
+                    while(timer.seconds() < delayTime) drive.update();
                     drive.followTrajectory(traj1low);
                     drive.followTrajectory(traj2low);
                     drive.followTrajectory(traj3low);
@@ -166,6 +170,8 @@ public class NikitaRedWarehouseAutoMeet3 extends LinearOpMode {
                     break;
 
                 case CENTER: //
+                    timer.reset();
+                    while(timer.seconds() < delayTime) drive.update();
                     drive.followTrajectory(traj1mid);
                     drive.followTrajectory(traj2mid);
                     drive.followTrajectory(traj3mid);
@@ -183,6 +189,7 @@ public class NikitaRedWarehouseAutoMeet3 extends LinearOpMode {
                     drive.followTrajectory(traj2high);
                     drive.followTrajectory(traj3high);
                     drive.followTrajectory(traj4high);
+                    drive.followTrajectory(traj5high);
                     felipe.liftLoad();
 
                     break;
