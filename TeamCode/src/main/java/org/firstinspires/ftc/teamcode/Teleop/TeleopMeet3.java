@@ -200,13 +200,13 @@ public class TeleopMeet3 extends LinearOpMode {
 
             }
 
-            if (gamepad1.left_trigger > 0.25 && julioPosition == JulioPosition.RIGHT90 &&
+            if (gamepad2.left_trigger > 0.25 && julioPosition == JulioPosition.RIGHT90 &&
                     felipe.getJuanPosition() >= felipe.JUANLIFTPARTIAL) {
                 felipe.homieRight();
 
             }
 
-            if (gamepad1.left_trigger > 0.25 && julioPosition == JulioPosition.LEFT90 &&
+            if (gamepad2.left_trigger > 0.25 && julioPosition == JulioPosition.LEFT90 &&
                     felipe.getJuanPosition() >= felipe.JUANLIFTPARTIAL) {
                 felipe.homieLeft();
 
