@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.Subsystems;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -59,6 +60,9 @@ public class FelipeTrois {
     public static final double      TICKS_PER_REV           =   1425.1; // 117 RPM motor 50.9:1 reduction
     public static final double      TICKS_PER_DEGREE         =  TICKS_PER_REV/360;
 
+    private int newtolerance = 3;       // encodet tick tolerance
+
+
     //Constants for robot home box
     public static final double      HOMIEBOXPIVOTLEFT       = 1;
     public static final double      HOMIEBOXPIVOTRIGHT      = 0.3;
@@ -89,10 +93,13 @@ public class FelipeTrois {
 
 
     LinearOpMode opmode;
+    //OpMode opmode;
+
 
     public FelipeTrois(LinearOpMode opmode) {
         this.opmode = opmode;
     }
+
 
 
     public void init(HardwareMap hwMap)  {
@@ -119,6 +126,8 @@ public class FelipeTrois {
 
         // get default PIDF values
        julioArm.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidJULIO_fNew);
+
+        julioArm.setTargetPositionTolerance(newtolerance); // mkaes juio arm more precise
 
 
         // Initialize Homie the servo that rotates the freight capture bucket

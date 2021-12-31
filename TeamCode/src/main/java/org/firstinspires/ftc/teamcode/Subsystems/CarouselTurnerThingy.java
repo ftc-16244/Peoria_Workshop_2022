@@ -18,7 +18,7 @@ public class CarouselTurnerThingy {
 
     public static final double      CAROUSELOFF = 0;
     public static final double      CAROUSELON = 0.40;
-    public static final double      CAROUSELONAUTOONLY = 0.30;
+    public static final double      CAROUSELONAUTOONLY = 0.25;
 
     // create a constructor to add in the special requirements
 
