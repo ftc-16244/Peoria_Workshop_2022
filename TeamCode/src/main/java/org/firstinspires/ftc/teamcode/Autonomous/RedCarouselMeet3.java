@@ -10,21 +10,16 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.apache.commons.math3.geometry.partitioning.Side;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-
 import org.firstinspires.ftc.teamcode.Enums.Alliance;
 import org.firstinspires.ftc.teamcode.Enums.Barcode;
 import org.firstinspires.ftc.teamcode.Enums.StartSide;
 import org.firstinspires.ftc.teamcode.Subsystems.CarouselTurnerThingy;
 import org.firstinspires.ftc.teamcode.Subsystems.FelipeDeux;
-
-import org.firstinspires.ftc.teamcode.Subsystems.FelipeTrois;
+import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
-
-import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 
 
 /*
@@ -32,7 +27,7 @@ import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
  */
 @Config
 @Autonomous(group = "Test")
-public class NikitaRBlueCarouselAutoMeet2 extends LinearOpMode {
+public class RedCarouselMeet3 extends LinearOpMode {
 
     OpenCvCamera webcam;
 
@@ -49,7 +44,7 @@ public class NikitaRBlueCarouselAutoMeet2 extends LinearOpMode {
 
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
-        FreightFrenzyTSEPipeline_EXP detector = new FreightFrenzyTSEPipeline_EXP(telemetry, Alliance.BLUE, StartSide.CAROUSEL);
+        FreightFrenzyTSEPipeline_EXP detector = new FreightFrenzyTSEPipeline_EXP(telemetry, Alliance.RED, StartSide.CAROUSEL);
         webcam.setPipeline(detector);
         webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
         {
@@ -87,142 +82,143 @@ public class NikitaRBlueCarouselAutoMeet2 extends LinearOpMode {
         ///////////////////////////////////////////////////////////////////////////
         // Trajectories - HIGH GOAL
         ///////////////////////////////////////////////////////////////////////////
-        Trajectory  traj_HG_01 = drive.trajectoryBuilder(new Pose2d())
-                .lineToLinearHeading(new Pose2d(44,3,Math.toRadians(179)))
-                .addTemporalMarker(-.25,()->{felipe.armMid();})
-                //.addTemporalMarker(-.25,()->{felipe.liftRise();})
-                .build();
-
-        Trajectory  traj_HG_02 = drive.trajectoryBuilder(traj_HG_01.end())
-                .lineToLinearHeading(new Pose2d(42,-34,Math.toRadians(179)))
-                .addTemporalMarker(-0.8,()->{felipe.thumbOpen();})
-                .addTemporalMarker(1,()->{felipe.thumbClose();})
-                .addTemporalMarker(1.5,()->{felipe.armInit();})
-
-                .build();
-
-        Trajectory  traj_HG_03 = drive.trajectoryBuilder(traj_HG_02.end())
-
-                .lineToLinearHeading(new Pose2d(15,-34,Math.toRadians(179)))
-
-                .build();
-        Trajectory  traj_HG_04 = drive.trajectoryBuilder(traj_HG_03.end())
-                // final touch up to engage carousel
-                .forward(5)
-                .addTemporalMarker(.25,()->{carousel.carouselTurnCCWAuto();})
-                .build();
-        Trajectory  traj_HG_05 = drive.trajectoryBuilder(traj_HG_04.end())
-                //back away but stay out of the wall to make it move better
-                .lineToLinearHeading(new Pose2d(30,-30,Math.toRadians(90)))
-                .addTemporalMarker(.25,()->{carousel.carouselTurnOff();})
-                .build();
-
-        ///////////////////////////////////////////////////////////////////////////
-        // Trajectories - MIDDLE GOAL
-        ///////////////////////////////////////////////////////////////////////////
-
-
-        Trajectory  traj_MG_01 = drive.trajectoryBuilder(new Pose2d())
-                .lineToLinearHeading(new Pose2d(42,-26,Math.toRadians(179)))
+        Trajectory  traj0 = drive.trajectoryBuilder(new Pose2d())
+                .lineToLinearHeading(new Pose2d(39,30,Math.toRadians(0)))
                 //.addTemporalMarker(-.25,()->{felipe.armMid();})
                 //.addTemporalMarker(-.25,()->{felipe.liftRise();})
                 .build();
-
-        Trajectory  traj_MG_02 = drive.trajectoryBuilder(traj_MG_01.end())
-                .lineToLinearHeading(new Pose2d(42,3,Math.toRadians(179)))
-                .addTemporalMarker(0.25,()->{felipe.armMid();})
+        Trajectory  traj1 = drive.trajectoryBuilder(traj0.end())
+                .lineToLinearHeading(new Pose2d(37,-5,Math.toRadians(0)))
+                .addTemporalMarker(.1,()->{felipe.armMid();})
                 //.addTemporalMarker(-.25,()->{felipe.liftRise();})
                 .build();
-        Trajectory  traj_MG_03 = drive.trajectoryBuilder(traj_MG_02.end())
 
-                .lineToLinearHeading(new Pose2d(42,-34,Math.toRadians(179)))
+        Trajectory  traj2 = drive.trajectoryBuilder(traj1.end())
                 .addTemporalMarker(-0.8,()->{felipe.thumbOpen();})
                 .addTemporalMarker(1,()->{felipe.thumbClose();})
                 .addTemporalMarker(1.5,()->{felipe.armInit();})
-                .build();
-        Trajectory  traj_MG_04 = drive.trajectoryBuilder(traj_MG_03.end())
-                //.addTemporalMarker(-0.8,()->{felipe.thumbOpen();})
-                //.addTemporalMarker(1,()->{felipe.thumbClose();})
-                //.addTemporalMarker(1.5,()->{felipe.armInit();})
-                .lineToLinearHeading(new Pose2d(15,-34,Math.toRadians(179)))
+                .lineToLinearHeading(new Pose2d(39,26,Math.toRadians(90)))
 
                 .build();
-        Trajectory  traj_MG_05 = drive.trajectoryBuilder(traj_MG_04.end())
-                // final touch up to engage carousel
-                .forward(5)
-                .addTemporalMarker(.25,()->{carousel.carouselTurnCCW();})
+
+        Trajectory  traj2A = drive.trajectoryBuilder(traj2.end())
+
+                .lineToLinearHeading(new Pose2d(11,28,Math.toRadians(90)))
+
                 .build();
-        Trajectory  traj_MG_06 = drive.trajectoryBuilder(traj_MG_05.end())
+
+        Trajectory  traj3 = drive.trajectoryBuilder(traj2A.end())
+                // final touch up to engage carousel
+                .strafeLeft(7)
+                .addTemporalMarker(1,()->{carousel.carouselTurnCWAuto();})
+                .build();
+        Trajectory  traj4 = drive.trajectoryBuilder(traj3.end())
                 //back away but stay out of the wall to make it move better
-                .lineToLinearHeading(new Pose2d(28,-31,Math.toRadians(90)))
+                .lineToLinearHeading(new Pose2d(30,29,Math.toRadians(-90)))
                 .addTemporalMarker(.25,()->{carousel.carouselTurnOff();})
                 .build();
-        ///////////////////////////////////////////////////////////////////////////
-        // Trajectories - LOW GOAL
-        ///////////////////////////////////////////////////////////////////////////
-        Trajectory  traj_LG_01 = drive.trajectoryBuilder(new Pose2d())
-                .lineToLinearHeading(new Pose2d(42,-26,Math.toRadians(179)))
-                .build();
-        Trajectory  traj_LG_02 = drive.trajectoryBuilder(traj_LG_01.end())
-                .lineToLinearHeading(new Pose2d(42,3,Math.toRadians(179)))
+        Trajectory  traj5 = drive.trajectoryBuilder(new Pose2d())
+                .lineToLinearHeading(new Pose2d(41,3,Math.toRadians(179)))
                 .addTemporalMarker(-.25,()->{felipe.armLow();})
                 //.addTemporalMarker(-.25,()->{felipe.liftRise();})
                 .build();
-        Trajectory traj_LG_03 = traj_MG_03;
-        Trajectory traj_LG_04 = traj_MG_04;
-        Trajectory traj_LG_05 = traj_MG_05;
-        Trajectory traj_LG_06 = traj_MG_06;
+        Trajectory  traj6 = drive.trajectoryBuilder(traj5.end())
+                .addTemporalMarker(-0.6,()->{felipe.thumbOpen();})
+                .addTemporalMarker(.1,()->{felipe.thumbClose();})
+                .addTemporalMarker(.5,()->{felipe.armInit();})
+                .lineToLinearHeading(new Pose2d(9,-28,Math.toRadians(-180)))
 
+                .build();
+        Trajectory  traj7 = drive.trajectoryBuilder(traj6.end())
+                // final touch up to engage carousel
+                .forward(5)
+                .addTemporalMarker(1,()->{carousel.carouselTurnCCW();})
+                .build();
+        Trajectory  traj8 = drive.trajectoryBuilder(traj7.end())
+                //back away but stay out of the wall to make it move better
+                .lineToLinearHeading(new Pose2d(26,-28,Math.toRadians(90)))
+                .addTemporalMarker(.25,()->{carousel.carouselTurnOff();})
+                .build();
 
+        Trajectory  traj5low = drive.trajectoryBuilder(new Pose2d())
+                .lineToLinearHeading(new Pose2d(37,-2,Math.toRadians(0)))
+                .addTemporalMarker(-.25,()->{felipe.armLow();})
+                .build();
+
+        Trajectory  traj6low = drive.trajectoryBuilder(traj5low.end())
+                .addTemporalMarker(-0.8,()->{felipe.thumbOpen();})
+                .addTemporalMarker(1,()->{felipe.thumbClose();})
+                .addTemporalMarker(1.5,()->{felipe.armInit();})
+                .lineToLinearHeading(new Pose2d(39,29,Math.toRadians(90)))
+
+                .build();
+        Trajectory  traj7low = drive.trajectoryBuilder(traj6low.end())
+
+                .lineToLinearHeading(new Pose2d(11,29,Math.toRadians(90)))
+
+                .build();
+
+        Trajectory  traj8low = drive.trajectoryBuilder(traj7low.end())
+                // final touch up to engage carousel
+                .strafeLeft(7)
+                .addTemporalMarker(1,()->{carousel.carouselTurnCWAuto();})
+                .build();
+        Trajectory  traj9low = drive.trajectoryBuilder(traj8low.end())
+                //back away but stay out of the wall to make it move better
+                .lineToLinearHeading(new Pose2d(30,29,Math.toRadians(-90)))
+                .addTemporalMarker(.25,()->{carousel.carouselTurnOff();})
+                .build();
         waitForStart();
         felipe.liftLoad();// put here becase opmode is acitve is a condition in the method that does this
         tfTime.reset(); //  reset the TF timer
 
             switch(detector.getLocation()){
                 case LEFT: //
-                    drive.followTrajectory(traj_LG_01);
-                    drive.followTrajectory(traj_LG_02);
-                    drive.followTrajectory(traj_LG_03);
-                    drive.followTrajectory(traj_LG_04);
+                    drive.followTrajectory(traj5low);
+                    drive.followTrajectory(traj6low);
                     felipe.liftLoad();
-                    drive.followTrajectory(traj_LG_05);//park
+                    drive.followTrajectory(traj7low);
+                    drive.followTrajectory(traj8low);
+
 
                     //delay to let carousel turn
                     timer.reset();
                     while(timer.seconds() < ducktime) drive.update();
 
-                    drive.followTrajectory(traj_LG_06);
+                    drive.followTrajectory(traj9low);
 
                     break;
 
                 case CENTER: //
-                    drive.followTrajectory(traj_MG_01);
-                    drive.followTrajectory(traj_MG_02);
-                    drive.followTrajectory(traj_MG_03);
-                    drive.followTrajectory(traj_MG_04);
-                    felipe.liftLoad();
-                    drive.followTrajectory(traj_MG_05);
+                    drive.followTrajectory(traj0);
+                    drive.followTrajectory(traj1);
+                    drive.followTrajectory(traj2);
+                    drive.followTrajectory(traj2A);
+                    drive.followTrajectory(traj3);
+
+                    //delay to let carousel turn
                     timer.reset();
                     while(timer.seconds() < ducktime) drive.update();
 
-                    drive.followTrajectory(traj_MG_06); //park
+                    drive.followTrajectory(traj4);
+
 
                     break;
 
                 case RIGHT: //level 3 highest goal
                     felipe.liftRise();
-                    drive.followTrajectory(traj_HG_01);
-                    drive.followTrajectory(traj_HG_02);
-                    drive.followTrajectory(traj_HG_03);
+                    drive.followTrajectory(traj0);
+                    drive.followTrajectory(traj1);
+                    drive.followTrajectory(traj2);
+                    drive.followTrajectory(traj2A);
                     felipe.liftLoad();
-                    drive.followTrajectory(traj_HG_04);
+                    drive.followTrajectory(traj3);
 
                     //delay to let carousel turn
                     timer.reset();
                     while(timer.seconds() < ducktime) drive.update();
 
-                    drive.followTrajectory(traj_HG_05);
-
+                    drive.followTrajectory(traj4);
                     break;
             }
         //}
@@ -241,5 +237,5 @@ public class NikitaRBlueCarouselAutoMeet2 extends LinearOpMode {
         webcam.stopStreaming();
     }
 
-
+//checking if my github works
 }

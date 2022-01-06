@@ -27,24 +27,24 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
  */
 @Config
 @Autonomous(group = "Test")
-public class NikitaBlueWarehouseMeet3 extends LinearOpMode {
+public class RedWarehouseMeet3 extends LinearOpMode {
 
     OpenCvCamera webcam;
 
     public static double DISTANCE = 30; // in
-    public ElapsedTime   tfTime      = new ElapsedTime(); // timer for tensor flow
     FelipeDeux felipe = new FelipeDeux(this); // instantiate Felipe (the main implement)
     CarouselTurnerThingy carousel = new CarouselTurnerThingy();
     // init and setup
     ElapsedTime runtime = new ElapsedTime();
     Barcode barcode = Barcode.RIGHT; // Default target zone
 
+
     @Override
     public void runOpMode() throws InterruptedException {
 
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
-        FreightFrenzyTSEPipeline_EXP detector = new FreightFrenzyTSEPipeline_EXP(telemetry, Alliance.BLUE, StartSide.WAREHOUSE);
+        FreightFrenzyTSEPipeline_EXP detector = new FreightFrenzyTSEPipeline_EXP(telemetry, Alliance.RED, StartSide.WAREHOUSE);
         webcam.setPipeline(detector);
         webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
         {
@@ -73,79 +73,124 @@ public class NikitaBlueWarehouseMeet3 extends LinearOpMode {
 
 
         ElapsedTime timer = new ElapsedTime();
-        double ducktime = 2.5; // carosel rotation time
+        double delayTime = 10; // delay time
         // initialize the other subsystems
         felipe.init(hardwareMap);
         carousel.init(hardwareMap);
         felipe.juanMechanicalReset();
 
-        ///////////////////////////////////////////////////////////////////////////
-        Trajectory  traj1low = drive.trajectoryBuilder(new Pose2d())
-                .lineToLinearHeading(new Pose2d(37,-3,Math.toRadians(0)))
-                .addTemporalMarker(-.25,()->{felipe.armLow();})
+
+        //for high goal
+        Trajectory  traj1high = drive.trajectoryBuilder(new Pose2d())
+                .lineToLinearHeading(new Pose2d(43,2,Math.toRadians(179)))
+                .addTemporalMarker(-.25,()->{felipe.armMid();})
                 .build();
-        Trajectory  traj2low = drive.trajectoryBuilder(traj1low.end())
+        Trajectory  traj2high = drive.trajectoryBuilder(traj1high.end())
                 .addTemporalMarker(-0.6,()->{felipe.thumbOpen();})
                 .addTemporalMarker(.5,()->{felipe.thumbClose();})
                 .addTemporalMarker(.7,()->{felipe.armInit();})
-                .lineToLinearHeading(new Pose2d(-4,2,Math.toRadians(90)))
+                .strafeLeft(4)
                 .build();
-        Trajectory  traj3low = drive.trajectoryBuilder(traj2low.end())
+        Trajectory  traj3high = drive.trajectoryBuilder(traj2high.end())
+                .lineToLinearHeading(new Pose2d(-4,-2,Math.toRadians(270)))
+                .build();
+        Trajectory  traj4high = drive.trajectoryBuilder(traj3high.end())
                 .forward(30)
                 .build();
-        Trajectory  traj4low = drive.trajectoryBuilder(traj3low.end())
-                .strafeRight(25)
+        Trajectory  traj5high = drive.trajectoryBuilder(traj4high.end())
+                .strafeLeft(25)
                 .build();
 
-        //mid goal
+        //for middle goal
         Trajectory  traj1mid = drive.trajectoryBuilder(new Pose2d())
-                .lineToLinearHeading(new Pose2d(37,-3,Math.toRadians(0)))
+                .lineToLinearHeading(new Pose2d(26,15,Math.toRadians(90)))
                 .addTemporalMarker(-.25,()->{felipe.armMid();})
                 .build();
         Trajectory  traj2mid = drive.trajectoryBuilder(traj1mid.end())
+                .strafeLeft(3)
                 .addTemporalMarker(-0.6,()->{felipe.thumbOpen();})
                 .addTemporalMarker(.5,()->{felipe.thumbClose();})
                 .addTemporalMarker(.7,()->{felipe.armInit();})
-                .lineToLinearHeading(new Pose2d(-4,2,Math.toRadians(90)))
                 .build();
         Trajectory  traj3mid = drive.trajectoryBuilder(traj2mid.end())
-                .forward(30)
+                .lineToLinearHeading(new Pose2d(17,12,Math.toRadians(-90)))
                 .build();
         Trajectory  traj4mid = drive.trajectoryBuilder(traj3mid.end())
-                .strafeRight(25)
+                .lineToLinearHeading(new Pose2d(-4,-2,Math.toRadians(-90)))
                 .build();
+        Trajectory  traj5mid = drive.trajectoryBuilder(traj4mid.end())
+                .forward(29)
+                .build();
+        Trajectory  traj6mid = drive.trajectoryBuilder(traj5mid.end())
+                .strafeLeft(25)
+                .build();
+
+        //for low goal
+        Trajectory  traj1low = drive.trajectoryBuilder(new Pose2d())
+                .lineToLinearHeading(new Pose2d(26,15,Math.toRadians(90)))
+                .addTemporalMarker(-.25,()->{felipe.armLow();})
+                .build();
+        Trajectory  traj2low = drive.trajectoryBuilder(traj1low.end())
+                .strafeLeft(6)
+                .addTemporalMarker(-0.6,()->{felipe.thumbOpen();})
+                .addTemporalMarker(2,()->{felipe.thumbClose();})
+                .addTemporalMarker(.7,()->{felipe.armInit();})
+                .build();
+        Trajectory  traj3low = drive.trajectoryBuilder(traj2low.end())
+                .lineToLinearHeading(new Pose2d(17,12,Math.toRadians(-90)))
+                .build();
+        Trajectory  traj4low = drive.trajectoryBuilder(traj3low.end())
+                .lineToLinearHeading(new Pose2d(-4,-2,Math.toRadians(-90)))
+                .build();
+        Trajectory  traj5low = drive.trajectoryBuilder(traj4low.end())
+                .forward(29)
+                .build();
+        Trajectory  traj6low = drive.trajectoryBuilder(traj5low.end())
+                .strafeLeft(25)
+                .build();
+
+
 
 
         waitForStart();
         felipe.liftLoad();// put here becase opmode is acitve is a condition in the method that does this
-        tfTime.reset(); //  reset the TF timer
 
             switch(detector.getLocation()){
                 case LEFT: //
+                    timer.reset();
+                    while(timer.seconds() < delayTime) drive.update();
                     drive.followTrajectory(traj1low);
                     drive.followTrajectory(traj2low);
                     drive.followTrajectory(traj3low);
                     drive.followTrajectory(traj4low);
+                    drive.followTrajectory(traj5low);
+                    drive.followTrajectory(traj6low);
                     felipe.liftLoad();
+
                     break;
 
                 case CENTER: //
+                    timer.reset();
+                    while(timer.seconds() < delayTime) drive.update();
                     drive.followTrajectory(traj1mid);
                     drive.followTrajectory(traj2mid);
                     drive.followTrajectory(traj3mid);
                     drive.followTrajectory(traj4mid);
+                    drive.followTrajectory(traj5mid);
+                    drive.followTrajectory(traj6mid);
                     felipe.liftLoad();
 
                     break;
 
                 case RIGHT: //level 3 highest goal
-                    felipe.liftRise();
-                    drive.followTrajectory(traj1mid);
-                    drive.followTrajectory(traj2mid);
-                    drive.followTrajectory(traj3mid);
-                    drive.followTrajectory(traj4mid);
-                    felipe.liftLoad();
 
+                    felipe.liftRise();
+                    drive.followTrajectory(traj1high);
+                    drive.followTrajectory(traj2high);
+                    drive.followTrajectory(traj3high);
+                    drive.followTrajectory(traj4high);
+                    drive.followTrajectory(traj5high);
+                    felipe.liftLoad();
 
                     break;
             }
