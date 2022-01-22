@@ -65,7 +65,7 @@ public class revArmEncoderTest extends LinearOpMode {
 
     private static final double     TICKS_PER_REV   =   8192; // REV Through Bore Encoder
     private static final double     TICKS_PER_DEG  =    TICKS_PER_REV/360; // REV Through Bore Encoder
-    private static final double     ARM_DEG_LEFT_TARGET_A =    90; // Degrees for huan reading
+    private static final double     ARM_DEG_LEFT_TARGET_A =   - 90; // Degrees for huan reading
 
     @Override
     public void runOpMode() {
@@ -74,8 +74,9 @@ public class revArmEncoderTest extends LinearOpMode {
         double  armDegrees = 0;
         double  armError = 1000; // initially set to ~45 degrees to make sure error is not ero at start
         double  armPower;
-        double  armKp = 0.00035; // initial guess at gain. 0.7 power with 90 degree error.
-        double  timeout = 3; //seconds
+        double  armKp = 0.00025;// initial guess at gain. 0.7 power with 90 degree error.
+        double  timeout = 5; //seconds
+        double  startTicks;
 
         telemetry.addData("Status", "Initialized");
         telemetry.update();
@@ -100,14 +101,57 @@ public class revArmEncoderTest extends LinearOpMode {
             // move the arm 90 degrees with left dpad button
             if (gamepad2.dpad_left){
                 armTarget =  ARM_DEG_LEFT_TARGET_A * TICKS_PER_DEG;
-                arm.setPower(.3);
+                //arm.setPower(.3);
+                startTicks = armEncoder.getCurrentPosition();
+                telemetry.addData("Arm Start Ticks",  startTicks);
+                telemetry.addData("Arm Target",  armTarget);
+                telemetry.addData("Arm Rotation in Ticks",  armEncoder.getCurrentPosition());
+                telemetry.addData("Arm Rotation in Degrees", armDegrees);
+                telemetry.addData("Arm Error", armError);
+                telemetry.update();
                 runtime.reset();
-                while (runtime.time() < timeout && -armEncoder.getCurrentPosition() <= armTarget){
+                while (runtime.time() < timeout && armEncoder.getCurrentPosition() >= armTarget){
+                    armError = armTarget  - armEncoder.getCurrentPosition();
+                    armPower = Math.abs(armError * armKp);
+                    arm.setPower(0.08 + armPower); // power decreases with error
+                    armDegrees= armEncoder.getCurrentPosition()/ TICKS_PER_DEG;
+                    telemetry.addData("Arm Start Ticks",  startTicks);
+                    telemetry.addData("Arm Target",  armTarget);
+                    telemetry.addData("Arm Rotation in Ticks",  armEncoder.getCurrentPosition());
+                    telemetry.addData("Arm Rotation in Degrees", armDegrees);
+                    telemetry.addData("Arm Error", armError);
+                    telemetry.addData("Arm Power", armPower+.08);
+                    telemetry.update();
+                }
+                arm.setPower(0.08);
+                //telemetry.addData("Arm in Low Power Mode","Now");
+                //telemetry.update();
+
+            }
+
+            if (gamepad2.dpad_down){
+                armTarget =  0;
+                //arm.setPower(.3);
+                runtime.reset();
+                while (runtime.time() < timeout && armEncoder.getCurrentPosition() > armTarget){
                     armError = armTarget -armEncoder.getCurrentPosition();
                     armPower =  armError * armKp;
                     arm.setPower( armPower); // power decreases with error
                     armDegrees= -armEncoder.getCurrentPosition()/ TICKS_PER_DEG;
-                    telemetry.addData("Arm Rotation in Degrees", armDegrees);
+                    telemetry.addData("Arm Tick Error",  armError);
+                    telemetry.update();
+                }
+                arm.setPower(0.15);
+            }
+
+            if (gamepad2.dpad_right){
+                // see encoder behavior when running in a time loop
+                runtime.reset();
+                arm.setPower(0.15);
+                while (runtime.time() <5){
+
+                    telemetry.addData("Arm Ticks ",  armEncoder.getCurrentPosition());
+                    telemetry.addData("Arm Position - Degrees",armEncoder.getCurrentPosition()/TICKS_PER_DEG);
                     telemetry.update();
                 }
                 arm.setPower(0);
