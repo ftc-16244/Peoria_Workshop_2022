@@ -64,13 +64,15 @@ public class JuamStateMachineExample extends LinearOpMode {
         LIFT_UP,
         LIFT_HOLD,
         LIFT_IDLE,
-        MANUAL
+        MANUAL,
+        UNKNOWN
     }
 
     private enum ArmState {
         ARM_CENTER,
         ARM_LEFT,
-        ARM_RIGHT
+        ARM_RIGHT,
+        UNKNOWN
     }
 
     private LiftState mliftstate; // m = member of the class as opposed to a local variable inside the "runOpmoode" method
@@ -88,12 +90,14 @@ public class JuamStateMachineExample extends LinearOpMode {
         juan.setDirection(DcMotorEx.Direction.FORWARD);
         juan.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
         juan.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+        mliftstate = LiftState.UNKNOWN;
 
 
         julio = hardwareMap.get(DcMotor.class, "julioArm");
         julio.setDirection(DcMotorEx.Direction.FORWARD);
         julio.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
         julio.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+        marmstate = ArmState.UNKNOWN;
 
 
         waitForStart();
@@ -106,9 +110,9 @@ public class JuamStateMachineExample extends LinearOpMode {
             double juliopower = gamepad1.right_stick_x;
 
             // Show the elapsed game time and wheel power.
-            telemetry.addData("Status", "Run Time: " + runtime.toString());
-            telemetry.addData("Motors", "juan (%.2f), julio (%.2f)", juanpower, juliopower);
-            telemetry.update();
+            //telemetry.addData("Status", "Run Time: " + runtime.toString());
+            //telemetry.addData("Motors", "juan (%.2f), julio (%.2f)", juanpower, juliopower);
+            //telemetry.update();
 
 ///////////////Driver initiated state transition via the game pad//////////////////////////
 
@@ -183,58 +187,10 @@ public class JuamStateMachineExample extends LinearOpMode {
             telemetry.addData("Status", "Run Time: " + runtime.toString());
             telemetry.addData("Lift State is",mliftstate);
             telemetry.addData("Lift Encoder Ticks are",juanPosition);
-            telemetry.addData("Motor Power is", juan.getPower());
+            telemetry.addData("Motor Power", "Juan (%.2f)", juanpower);
             telemetry.update();
 
 
-
-
-/**
-            if(mliftstate == LiftState.LIFT_UP){
-                telemetry.addData("Lift State is","UP");
-                telemetry.addData("Target Position is", JUANLPARTIAL  *  TICKS_PER_LIFT_IN);
-                if (juanPosition < JUANLPARTIAL  *  TICKS_PER_LIFT_IN ) // this prevents indexing up
-                    {juan.setPower(Math.abs(JUANLIFTSPEED_UP));
-                    telemetry.addData("Lift Counts",juanPosition);
-                    telemetry.update();
-                }
-                if( juanPosition >= JUANLPARTIAL  *  TICKS_PER_LIFT_IN  ){
-                    mliftstate = LiftState.LIFT_HOLD;
-
-                }
-
-            }
-
-            if(mliftstate == LiftState.LIFT_HOLD){
-                telemetry.addData("Lift State is","HOLD");
-                telemetry.addData("Lift Counts",juanPosition);
-                telemetry.update();
-                juan.setPower(Math.abs(JUANLIFTSPEED_HOLD));
-
-            }
-
-            if(mliftstate == LiftState.LIFT_DOWN){
-                telemetry.addData("Lift State is","DOWN");
-                telemetry.addData("Lift Counts",juanPosition);
-                telemetry.addData("Motor Down Power is", juan.getPower());
-                telemetry.update();
-
-                juan.setPower(JUANLIFTSPEED_DOWN);
-                if(juan.getCurrentPosition() < 20){
-                    mliftstate = LiftState.LIFT_IDLE;
-                }
-
-            }
-
-            if(mliftstate == LiftState.LIFT_IDLE){
-                telemetry.addData("Lift State is","IDLE");
-                telemetry.addData("Lift Counts",juan.getCurrentPosition());
-                telemetry.update();
-                juan.setPower(0);
-            }
-
-            telemetry.update();
-*/
         }
     }
 }
