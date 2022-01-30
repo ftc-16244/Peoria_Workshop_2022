@@ -29,11 +29,14 @@
 
 package org.firstinspires.ftc.teamcode.Test;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
@@ -42,10 +45,11 @@ import org.firstinspires.ftc.teamcode.Enums.LiftPosition;
 
 @TeleOp(name="Juan State Machine Example", group="Linear Opmode")
 //@Disabled
-public class JuanStateMachineExample extends LinearOpMode {
-
+public class  JuanStateMachineExample extends LinearOpMode {
+    private final FtcDashboard dashboard = FtcDashboard.getInstance();
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
+    private ElapsedTime lifttime = new ElapsedTime(); // used to see how lon it takes to lift
     private ElapsedTime teleopTimer = new ElapsedTime();
     private DcMotor juan = null;
     private DcMotor julio = null;
@@ -56,17 +60,21 @@ public class JuanStateMachineExample extends LinearOpMode {
 
     private static final double     JUAN_HEIGHT_PARTIAL         = 5.5; // inches
 
-    private static final double     JUAN_SPEED_UP               = 0.9; // power
-    private static final double     JUAN_SPEED_DOWN             = -0.2; // power
-    private static final double     JUAN_SPEED_HOLD             = 0.2;
+    private static double     JUAN_SPEED_UP               = 0.9; // power
+    private static double     JUAN_SPEED_DOWN             = -0.2; // power
+    private static double     JUAN_SPEED_HOLD             = 0.12;
     private static final double     TELEOP_TIME_OUT             = 122; // seconds - Automatically shuts down teleop to prevent motor damage (for practice sessions)
 
     private LiftState mliftstate; // "m" = class variable that all methods can share. Not a local variable
     private ArmState marmstate;
 
+    private static double     juanKp                      = 0.0015; //power per tick of error
+    private static double     juanKf                      = 0.25; //feed forward
+
     private enum LiftState {
         LIFT_DOWN,
         LIFT_UP,
+        LIFT_PROP_UP,
         LIFT_HOLD,
         LIFT_IDLE,
         MANUAL,
@@ -87,9 +95,13 @@ public class JuanStateMachineExample extends LinearOpMode {
     public void runOpMode() {
 
         int juanPosition; // local variable that only works inside "runOpmode" it is not shared to other methods
-
+        int juanTarget = 0;
+        int juanLifError;
+        String lifttimestring ="";
         telemetry.addData("Status", "Initialized");
         telemetry.update();
+
+        VoltageSensor voltSensor = hardwareMap.voltageSensor.get("Expansion Hub 2"); // go to robot config, click Expansion Hub and look to see what number hub it is if you don't already know
 
         juan = hardwareMap.get(DcMotor.class, "juanLift");
         juan.setDirection(DcMotorEx.Direction.FORWARD);
@@ -106,8 +118,11 @@ public class JuanStateMachineExample extends LinearOpMode {
 
         juanMechanicalReset();// make sure lift is all the way down before starting
 
+        telemetry = new MultipleTelemetry(telemetry,dashboard.getTelemetry());
+
         waitForStart();
         runtime.reset();
+        teleopTimer.reset(); // reset because the clock starts when you init.
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive() &&  teleopTimer.seconds() < TELEOP_TIME_OUT  ) {
@@ -124,9 +139,20 @@ public class JuanStateMachineExample extends LinearOpMode {
 
             if (gamepad1.y) {
                 mliftstate = LiftState.LIFT_UP;
+                juanTarget = (int)(JUAN_HEIGHT_PARTIAL  *  TICKS_PER_LIFT_IN);
+
+                lifttime.reset(); // reset lift time as soon as drive pushes button
+            }
+
+            if (gamepad1.b) {
+                mliftstate = LiftState.LIFT_PROP_UP;
+                lifttime.reset(); // reset lift time as soon as drive pushes button
+                juanTarget = (int)(JUAN_HEIGHT_PARTIAL  *  TICKS_PER_LIFT_IN);
             }
             if (gamepad1.a) {
                 mliftstate = LiftState.LIFT_DOWN;
+                lifttime.reset(); // reset lift time as soon as drive pushes button
+                juanTarget = 0;
             }
             // by moving the left joystick in either direction the driver takes manual control.
             if (Math.abs(gamepad1.left_stick_y) > 0.25) {
@@ -135,14 +161,37 @@ public class JuanStateMachineExample extends LinearOpMode {
 
             ////////////////////////////  SWITCH CASE for states     ////////////////
 
-            juanPosition = juan.getCurrentPosition(); // call once before switch to save methods calls
+            juanPosition = juan.getCurrentPosition(); // call once before switch to save methods calls.
+            juanLifError = ((int)(JUAN_HEIGHT_PARTIAL  *  TICKS_PER_LIFT_IN) - juanPosition);
+
 
             switch (mliftstate){
 
                 case LIFT_UP:
 
+                    if  (juanPosition <JUAN_HEIGHT_PARTIAL  *  TICKS_PER_LIFT_IN ) // this prevents short power up of motors if target
+                        // is achieved and the driver accidentally pushes the lift up button again.
+                        // without this, the motor will power on for the duration of the loop time; 10-20 ms ot so.
+
+                        {juan.setPower(Math.abs(JUAN_SPEED_UP ));
+                            lifttimestring = lifttime.toString(); // convert lifttime to a string as long as case is active
+                            // the timer never stops. If timer output is converted to text when we wnat, we just read the last value
+                            // becase that is all we care about. It tell us how ling we were in this state. Helpful for tuning.
+                    }
+                    // The exit condition for LIFT_UP is reaching the target height - no operator input needed
+                    // If the driver presses the DOWN button it would also change the state
+                    if( juanPosition >= JUAN_HEIGHT_PARTIAL  *  TICKS_PER_LIFT_IN  ){
+                        mliftstate = LiftState.LIFT_HOLD;
+                    }
+
+                    break;
+
+
+                case LIFT_PROP_UP:
+
                     if  (juanPosition <JUAN_HEIGHT_PARTIAL  *  TICKS_PER_LIFT_IN ) // this prevents short power up of motore each time button is pressed.
-                    {juan.setPower(Math.abs(JUAN_SPEED_UP ));
+                    {juan.setPower(juanKf  + (juanLifError * juanKp));
+                        lifttimestring = lifttime.toString();
                     }
                     // The exit condition for LIFT_UP is reaching the target height - no operator input needed
                     // If the driver presses the DOWN button it would also change the state
@@ -154,6 +203,7 @@ public class JuanStateMachineExample extends LinearOpMode {
 
                 case LIFT_DOWN: //
                     juan.setPower(JUAN_SPEED_DOWN);
+                    lifttimestring = lifttime.toString();
                     // The exit condition for LIFT_DOWN is reaching a very low lift position - no operator input needed
                     if(juan.getCurrentPosition() < 20){
                         mliftstate = LiftState.LIFT_IDLE;
@@ -186,9 +236,12 @@ public class JuanStateMachineExample extends LinearOpMode {
             }
             // Telemetry to torubleshoot switch cases
             telemetry.addData("Status", "Run Time: " + runtime.toString());
+            telemetry.addData("Lift Transition Time",lifttimestring);
             telemetry.addData("Lift State is",mliftstate);
+            telemetry.addData("Lift Encoder Target is",(juanTarget));
             telemetry.addData("Lift Encoder Ticks are",juanPosition);
             telemetry.addData("Motor Power", "Juan (%.2f)", juanpower);
+            telemetry.addData("Battery","  Voltage (%.2f)" ,voltSensor.getVoltage());
             telemetry.update();
 
 
