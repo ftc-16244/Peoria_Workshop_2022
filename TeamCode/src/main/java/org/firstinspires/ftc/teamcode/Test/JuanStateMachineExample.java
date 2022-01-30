@@ -44,7 +44,7 @@ import org.firstinspires.ftc.teamcode.Enums.LiftPosition;
 
 
 @TeleOp(name="Juan State Machine Example", group="Linear Opmode")
-//@Disabled
+@Disabled
 public class  JuanStateMachineExample extends LinearOpMode {
     private final FtcDashboard dashboard = FtcDashboard.getInstance();
     // Declare OpMode members.
