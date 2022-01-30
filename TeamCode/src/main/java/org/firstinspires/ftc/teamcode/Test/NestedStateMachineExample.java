@@ -44,41 +44,44 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 public class NestedStateMachineExample extends LinearOpMode {
     private final FtcDashboard dashboard = FtcDashboard.getInstance();
     // Declare OpMode members.
-    private ElapsedTime runtime = new ElapsedTime();
-    private ElapsedTime lifttime = new ElapsedTime(); // used to see how lon it takes to lift
-    private ElapsedTime teleopTimer = new ElapsedTime();
-    private DcMotor juan = null;
-    private DcMotor julio = null;
+    private ElapsedTime             runtime         = new ElapsedTime();
+    private ElapsedTime             lifttime        = new ElapsedTime(); // used to see how lon it takes to lift
+    private ElapsedTime             teleopTimer     = new ElapsedTime();
+    private DcMotor                 juan            = null;
+    private DcMotor                 julio           = null;
+    private static final double     TELEOP_TIME_OUT             =   122; // seconds - Automatically shuts down teleop to prevent motor damage (for practice sessions)
 
-    private static final double     TICKS_PER_MOTOR_REV         = 537.7; // goBilda 312 RPM motor
-    private static final double     LIFT_DIST_PER_REV           = 42 * Math.PI / 25.4; // inches of lift per motor rev (42mm  winch pulley)
-    public static final double      TICKS_PER_LIFT_IN           = TICKS_PER_MOTOR_REV / LIFT_DIST_PER_REV ; // 100 and change
+    // Lift (Juan) ///
 
-    private static final double     JULIO_LEFT90                =   90; // degrees
+    private static final double     TICKS_PER_MOTOR_REV         =   537.7; // goBilda 312 RPM motor
+    private static final double     LIFT_DIST_PER_REV           =   42 * Math.PI / 25.4; // inches of lift per motor rev (42mm  winch pulley)
+    public static final double      TICKS_PER_LIFT_IN           =   TICKS_PER_MOTOR_REV / LIFT_DIST_PER_REV ; // 100 and change
+    private static final double     JUAN_HEIGHT_PARTIAL         =   4.0; // inches
+    private static double           JUAN_SPEED_UP               =   0.9; // power
+    private static double           JUAN_SPEED_DOWN             =   -0.2; // power
+    private static double           JUAN_SPEED_HOLD             =   0.12;
+    private static double           juanKp                      =   0.0015; //power per tick of error (Juan)
+    private static double           juanKf                      =   0.25; //feed forward for the lift (Juan)
+
+    // Arm (Julio) ///
+
+
+    private static final double     JULIO_LEFT90                =   -390; // degrees
+    private static final double     JULIO_RIGHT90               =  390; // degrees
     private static final double     TICKS_PER_DEGREE            =   1425.1/360; // ticks per degree
     private static final double     JULIO_SPEED_UP              =   0.5; // power to rotate up
     private static final double     JULIO_SPEED_DOWN            =   -0.15; // power to rotate back
     private static final double     JULIO_SPEED_HOLD            =   0.10; // power to hold against gravity - check signs
+    private static final double     julioKp                     =  0.00112; //power per tick of error (Julio)
+    private static double           julioKf                     =  0.25; //feed forward for the arm - Cosine relationship so not FINAL
 
-    private static final double     JUAN_HEIGHT_PARTIAL         = 4.0; // inches
-
-    private static double           JUAN_SPEED_UP               = 0.9; // power
-    private static double           JUAN_SPEED_DOWN             = -0.2; // power
-    private static double           JUAN_SPEED_HOLD             = 0.12;
-    private static final double     TELEOP_TIME_OUT             = 122; // seconds - Automatically shuts down teleop to prevent motor damage (for practice sessions)
+   // States
 
     private LiftState               mliftstate; // "m" = class variable that all methods can share. Not a local variable
     private ArmState                marmstate;
     private DriverCommandState      mdrivercmdstate;
 
-    private static double           juanKp                      = 0.0015; //power per tick of error (Juan)
-    private static double           juanKf                      = 0.25; //feed forward for the lift (Juan)
-
-    private static double           julioKp                      = 0.00112; //power per tick of error (Julio)
-    private static double           julioKf                      = 0.25; //feed forward for the arm - Cosine relationship (Julio)
-
-
-
+  // mover to ENUM package eventually
     private enum LiftState {
         LIFT_DOWN,
         LIFT_UP,
@@ -94,7 +97,6 @@ public class NestedStateMachineExample extends LinearOpMode {
         ARM_CENTER,
         ARM_LEFT,
         ARM_RIGHT,
-
         ARM_HOLD,
         ARM_PARKED,
         UNKNOWN
@@ -122,7 +124,7 @@ public class NestedStateMachineExample extends LinearOpMode {
         int julioTarget = 0;
         int julioError;
 
-        double juanKfCorr;
+        double juanKfCorr; // corrects feed forward for battery voltage
 
 
         String lifttimestring ="";
@@ -130,7 +132,7 @@ public class NestedStateMachineExample extends LinearOpMode {
         telemetry.update();
 
         VoltageSensor  voltSensor = hardwareMap.voltageSensor.get("Expansion Hub 2"); // go to robot config, click Expansion Hub and look to see what number hub it is if you don't already know
-        juanKfCorr = (juanKf *voltSensor.getVoltage()) /12;
+
 
         juan = hardwareMap.get(DcMotor.class, "juanLift");
         juan.setDirection(DcMotorEx.Direction.FORWARD);
@@ -169,22 +171,24 @@ public class NestedStateMachineExample extends LinearOpMode {
             //        a
 
 
-            if (gamepad1.y) {
+            if (gamepad1.dpad_left) {
                 mdrivercmdstate = DriverCommandState.ALLIANCE_HUB_LEFT;
                 mliftstate = LiftState.LIFT_UP;
                 juanTarget = (int) (JUAN_HEIGHT_PARTIAL * TICKS_PER_LIFT_IN);
                 julioTarget = (int) (JULIO_LEFT90 * TICKS_PER_DEGREE);
-
                 lifttime.reset(); // reset lift time as soon as drive pushes button
             }
 
-            if (gamepad1.b) {
-                mliftstate = LiftState.LIFT_PROP_UP;
-                lifttime.reset(); // reset lift time as soon as drive pushes button
+            if (gamepad1.dpad_right) {
+                mdrivercmdstate = DriverCommandState.ALLIANCE_HUB_RIGHT;
+                mliftstate = LiftState.LIFT_UP;
                 juanTarget = (int) (JUAN_HEIGHT_PARTIAL * TICKS_PER_LIFT_IN);
+                julioTarget = (int) (JULIO_RIGHT90 * TICKS_PER_DEGREE);
+                lifttime.reset(); // reset lift time as soon as drive pushes button
 
             }
-            if (gamepad1.a) {
+            if (gamepad1.dpad_down) {
+                mdrivercmdstate = DriverCommandState.RELOAD;
                 mliftstate = LiftState.LIFT_DOWN;
                 lifttime.reset(); // reset lift time as soon as drive pushes button
                 juanTarget = 0;
@@ -206,19 +210,17 @@ public class NestedStateMachineExample extends LinearOpMode {
 
             switch (mdrivercmdstate) {
 
-
                 case ALLIANCE_HUB_LEFT:
 
                     switch (mliftstate) {
 
                         case LIFT_UP:
-
                             if (juanPosition < juanTarget) // this prevents short power up of motors if target
                             // is achieved and the driver accidentally pushes the lift up button again.
                             // without this, the motor will power on for the duration of the loop time; 10-20 ms ot so.
 
                             {
-                                juan.setPower(JUAN_SPEED_UP);
+                                juan.setPower(juanKfCorr + (juanLifError * juanKp));
                                 lifttimestring = lifttime.toString(); // convert lifttime to a string as long as case is active
                                 // the timer never stops. If timer output is converted to text when we wnat, we just read the last value
                                 // becase that is all we care about. It tell us how ling we were in this state. Helpful for tuning.
@@ -232,32 +234,36 @@ public class NestedStateMachineExample extends LinearOpMode {
                                 // In this case the ArmState.ArmLeft is an action performed in the LIFT_UP case of the lift.
                                 // This is then seen as an event in the ArmState State Machine. So this is kind of an action and event depending
                                 // the vantage point.
-
                             }
+                            break;
+
+                        case LIFT_HOLD: // Power high enough to prevent lift from dropping but not high enough to lift it.
+                            juan.setPower(Math.abs(JUAN_SPEED_HOLD));
 
                             break;
 
+                        case MANUAL: //Joystick control
+                            // Send calculated power to lift
+                            juan.setPower(juanpower);
 
-                        case LIFT_PROP_UP:
-
-                            if (juanPosition < juanTarget) // this prevents short power up of motore each time button is pressed.
-                            {
-                                juan.setPower(juanKfCorr + (juanLifError * juanKp));
-                                lifttimestring = lifttime.toString();
-                            }
-                            // The exit condition for LIFT_UP is reaching the target height - no operator input needed
-                            // If the driver presses the DOWN button it would also change the state
-                            if (juanPosition >= JUAN_HEIGHT_PARTIAL * TICKS_PER_LIFT_IN) {
-                                mliftstate = LiftState.LIFT_HOLD;
-                            }
-
+                            // Exiting this state requires driver button press.
                             break;
+
+
+                } // end of switch case Alliance Hub Left
+
+
+           // break;
+
+
+                case RELOAD:
+
+                    switch (mliftstate) {
 
                         case LIFT_DOWN: //
-                            if (marmstate != ArmState.ARM_PARKED){
+                            if (marmstate != ArmState.ARM_PARKED) {
                                 marmstate = ArmState.ARM_CENTER;
-                            }
-                            else {
+                            } else {
                                 juan.setPower(JUAN_SPEED_DOWN);
                                 lifttimestring = lifttime.toString();
                                 // The exit condition for LIFT_DOWN is reaching a very low lift position - no operator input needed
@@ -268,30 +274,54 @@ public class NestedStateMachineExample extends LinearOpMode {
 
                             break;
 
-                        case LIFT_HOLD: // Power high enough to prevent lift from dropping but not high enough to lift it.
-                            juan.setPower(Math.abs(JUAN_SPEED_HOLD));
-
-                            break;
-
                         case LIFT_IDLE: //Protects motor by turning it off as the lift is almost at the bottom.
 
                             juan.setPower(0);
                             // Exiting this state requires driver button press.
                             break;
+                    }
 
+
+                case ALLIANCE_HUB_RIGHT:
+
+                    switch (mliftstate) {
+
+                        case LIFT_UP:
+                            if (juanPosition < juanTarget){
+                                juan.setPower(juanKfCorr + (juanLifError * juanKp));
+                                lifttimestring = lifttime.toString(); // convert lifttime to a string as long as case is active
+                                // the timer never stops. If timer output is converted to text when we wnat, we just read the last value
+                                // becase that is all we care about. It tell us how ling we were in this state. Helpful for tuning.
+                            }
+                            // The exit condition for LIFT_UP is reaching the target height - no operator input needed
+                            // If the driver presses the DOWN button it would also change the state
+                            if (juanPosition >= juanTarget) {
+                                mliftstate = LiftState.LIFT_HOLD;
+                                marmstate = ArmState.ARM_RIGHT; //when in hold go ahead and pivot arm. this assumes the lift won't fall down too.
+                                // There is no exit condition for the lift defined. THis is because we need operator input to get out of the HOLD state.
+                                // In this case the ArmState.ArmLeft is an action performed in the LIFT_UP case of the lift.
+                                // This is then seen as an event in the ArmState State Machine. So this is kind of an action and event depending
+                                // the vantage point.
+                            }
+                            break;
+
+                        case LIFT_HOLD: // Power high enough to prevent lift from dropping but not high enough to lift it.
+                            juan.setPower(Math.abs(JUAN_SPEED_HOLD));
+
+                            break;
 
                         case MANUAL: //Joystick control
-                            // Send calculated power to wheels
+                            // Send calculated power to lift
                             juan.setPower(juanpower);
 
                             // Exiting this state requires driver button press.
                             break;
 
 
-                } // end of switch case for Juan
+                    } // end of switch case Alliance Hub Right
 
+                    break;
 
-            break;
             } // end of driver switch state
 
             switch (marmstate){
@@ -299,7 +329,7 @@ public class NestedStateMachineExample extends LinearOpMode {
                 case ARM_LEFT:
 
                     if (julioPosition < julioTarget){ // only move it below te target
-                        julio.setPower(Math.abs(JULIO_SPEED_UP));
+                        julio.setPower(-JULIO_SPEED_UP);
 
                     }
                     else{
@@ -310,22 +340,29 @@ public class NestedStateMachineExample extends LinearOpMode {
                 break;
 
                 case ARM_RIGHT:
+                    if (julioPosition < julioTarget){ // only move it below te target
+                        julio.setPower(JULIO_SPEED_UP);
+
+                    }
+                    else{
+
+                        marmstate = ArmState.ARM_HOLD;
+                    }
                     break;
 
                 case ARM_CENTER:
-                    if (Math.abs(julioPosition -julioTarget) > 20) {
-                        julio.setPower(-0.1+(julioError * julioKp));
+                    if ((julioPosition -julioTarget) > 20) {
+                        julio.setPower((-0.1 + julioError * julioKp));
                     }
+                    else if ((julioPosition -julioTarget) < -20){
+                            julio.setPower((0.1+julioError * julioKp));
+                        }
+
                     else{
                         marmstate = ArmState.ARM_PARKED;
                     }
 
-
                     break;
-
-
-
-
 
                 case ARM_HOLD:
 
@@ -353,7 +390,7 @@ public class NestedStateMachineExample extends LinearOpMode {
             //telemetry.addData("Lift Encoder Ticks are", juanPosition);
             telemetry.addData("Arm Encoder Target is", (julioTarget));
             telemetry.addData("Arm Encoder Ticks are", julioPosition);
-            telemetry.addData("Motor Power", "Juan (%.2f)", juanpower);
+            telemetry.addData("Motor Power", "Julio (%.2f)", julio.getPower());
             telemetry.addData("Battery", "  Voltage (%.2f)", voltSensor.getVoltage());
             telemetry.update();
 
