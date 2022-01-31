@@ -35,6 +35,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -49,6 +50,7 @@ public class BetterStateMachine extends LinearOpMode {
     private ElapsedTime             teleopTimer     = new ElapsedTime();
     private DcMotor                 juan            = null;
     private DcMotor                 julio           = null;
+    private Servo                   homieBox         = null;
     private static final double     TELEOP_TIME_OUT             =   122; // seconds - Automatically shuts down teleop to prevent motor damage (for practice sessions)
 
     // Lift (Juan) ///
@@ -75,11 +77,17 @@ public class BetterStateMachine extends LinearOpMode {
     private static final double     julioKp                     =  0.00112; //power per tick of error (Julio)
     private static double           julioKf                     =  0.25; //feed forward for the arm - Cosine relationship so not FINAL
 
+    public static final double      HOMIEBOXPIVOTLEFT       = 1;
+    public static final double      HOMIEBOXPIVOTRIGHT      = 0.3;
+    public static final double      HOMIEBOXPIVOTCENTER     = 0.66;
+    public static final double      HOMIEDELAY              = 0.15;
+
    // States
 
     private LiftState               mliftstate; // "m" = class variable that all methods can share. Not a local variable
     private ArmState                marmstate;
     private DriverCommandState      mdrivercmdstate;
+    private HomieState              mhomieState = HomieState.CENTER;
 
   // mover to ENUM package eventually
     private enum LiftState {
@@ -112,7 +120,12 @@ public class BetterStateMachine extends LinearOpMode {
         UNKNOWN
     }
 
-
+    private enum HomieState{
+        LEFT,
+        RIGHT,
+        CENTER,
+        DRIVER_OPTION
+    }
 
     @Override
     public void runOpMode() {
@@ -149,6 +162,10 @@ public class BetterStateMachine extends LinearOpMode {
         marmstate = ArmState.UNKNOWN;
 
         mdrivercmdstate = DriverCommandState.UNKNOWN;
+
+        homieBox = hardwareMap.get(Servo.class,"homieBox");
+
+        homieBox.setPosition(HOMIEBOXPIVOTCENTER);
 
         juanMechanicalReset();// make sure lift is all the way down before starting
 
@@ -252,11 +269,14 @@ public class BetterStateMachine extends LinearOpMode {
 
                     if (juanPosition >= juanTarget) {
                         mliftstate = LiftState.LIFT_HOLD;
+
                         if (mdrivercmdstate == DriverCommandState.ALLIANCE_HUB_LEFT){
-                            marmstate = ArmState.ARM_LEFT;
+                                mhomieState = HomieState.LEFT;
+                                marmstate = ArmState.ARM_LEFT;
                             }
                             if (mdrivercmdstate == DriverCommandState.ALLIANCE_HUB_RIGHT ) {
-                                    marmstate = ArmState.ARM_RIGHT;
+                                mhomieState = HomieState.RIGHT;
+                                marmstate = ArmState.ARM_RIGHT;
                             }
 
                         }
@@ -269,7 +289,8 @@ public class BetterStateMachine extends LinearOpMode {
 
                 case LIFT_DOWN: //
                     if (marmstate != ArmState.ARM_PARKED) {
-                            marmstate = ArmState.ARM_CENTER;
+                        mhomieState = HomieState.CENTER;
+                        marmstate = ArmState.ARM_CENTER;
                     }
                     else {
                             juan.setPower(JUAN_SPEED_DOWN);
@@ -344,6 +365,7 @@ public class BetterStateMachine extends LinearOpMode {
                 case ARM_HOLD:
 
                     julio.setPower(JULIO_SPEED_HOLD + (julioError * julioKp));
+                    mhomieState = HomieState.DRIVER_OPTION;
 
                     break;
 
@@ -355,17 +377,45 @@ public class BetterStateMachine extends LinearOpMode {
                     break;
 
             } // end of arm state switch case
+
+            switch (mhomieState){
+
+                case CENTER:
+                    homieBox.setPosition(HOMIEBOXPIVOTCENTER);
+                    break;
+
+                case LEFT:
+                    homieBox.setPosition(HOMIEBOXPIVOTLEFT);
+
+                case RIGHT:
+                    homieBox.setPosition(HOMIEBOXPIVOTRIGHT);
+
+                case DRIVER_OPTION:
+                    if (gamepad1.right_trigger > 0.25 & marmstate == ArmState.ARM_HOLD & mdrivercmdstate == DriverCommandState.ALLIANCE_HUB_LEFT) {
+                        homieDumpArmLeft();
+                        telemetry.addData("Homie Dump Left", "Complete ");
+                    }
+                    if (gamepad1.right_trigger > 0.25 & marmstate == ArmState.ARM_HOLD & mdrivercmdstate == DriverCommandState.ALLIANCE_HUB_RIGHT) {
+                        homieDumpArmRight(); 
+                        telemetry.addData("Homie Dump Right", "Complete ");
+                    }
+
+            }
+
+
+
             // Telemetry to troubleshoot switch cases
             //telemetry.addData("Status", "Run Time: " + runtime.toString());
             telemetry.addData("Lift Transition Time", lifttimestring);
             telemetry.addData("Lift State is", mliftstate);
-            //telemetry.addData("Arm State is", marmstate);
-            telemetry.addData("Lift Encoder Target is", (juanTarget));
-            telemetry.addData("Lift Encoder Ticks are", juanPosition);
-            //telemetry.addData("Arm Encoder Target is", (julioTarget));
-            //telemetry.addData("Arm Encoder Ticks are", julioPosition);
+            telemetry.addData("Arm State is", marmstate);
+            telemetry.addData("Homie State is", mhomieState);
+            //telemetry.addData("Lift Encoder Target is", (juanTarget));
+            //telemetry.addData("Lift Encoder Ticks are", juanPosition);
+            telemetry.addData("Arm Encoder Target is", (julioTarget));
+            telemetry.addData("Arm Encoder Ticks are", julioPosition);
             //telemetry.addData("Motor Power", "Julio (%.2f)", julio.getPower());
-            telemetry.addData("Motor Power", "Juan (%.2f)", juan.getPower());
+            //telemetry.addData("Motor Power", "Juan (%.2f)", juan.getPower());
             telemetry.addData("Battery", "  Voltage (%.2f)", voltSensor.getVoltage());
             telemetry.update();
 
@@ -400,5 +450,19 @@ public class BetterStateMachine extends LinearOpMode {
         telemetry.addData("Lift State is",mliftstate);
         telemetry.update();
 
+    }
+
+    public void homieDumpArmLeft(){
+        homieBox.setPosition(HOMIEBOXPIVOTRIGHT);
+        sleep(500);
+        homieBox.setPosition(HOMIEBOXPIVOTCENTER);
+        sleep(500);
+    }
+
+    public void homieDumpArmRight(){
+        homieBox.setPosition(HOMIEBOXPIVOTLEFT);
+        sleep(500);
+        homieBox.setPosition(HOMIEBOXPIVOTCENTER);
+        sleep(500);
     }
 }
