@@ -80,7 +80,7 @@ public class BetterStateMachine extends LinearOpMode {
     public static final double      HOMIEBOXPIVOTLEFT       = 1;
     public static final double      HOMIEBOXPIVOTRIGHT      = 0.3;
     public static final double      HOMIEBOXPIVOTCENTER     = 0.66;
-    public static final double      HOMIEDELAY              = 0.15;
+
 
    // States
 
@@ -267,28 +267,29 @@ public class BetterStateMachine extends LinearOpMode {
                                 // becase that is all we care about. It tell us how ling we were in this state. Helpful for tuning.
                         }
 
-                    if (juanPosition >= juanTarget) {
-                        mliftstate = LiftState.LIFT_HOLD;
-
-                        if (mdrivercmdstate == DriverCommandState.ALLIANCE_HUB_LEFT){
+                    else if (juanPosition >= juanTarget) {
+                           if (mdrivercmdstate == DriverCommandState.ALLIANCE_HUB_LEFT){
                                 mhomieState = HomieState.LEFT;
-                                marmstate = ArmState.ARM_LEFT;
+                               //homieLeft(); // command servos directly, they don't like the switch case
+                               marmstate = ArmState.ARM_LEFT;
                             }
-                            if (mdrivercmdstate == DriverCommandState.ALLIANCE_HUB_RIGHT ) {
+                           else if (mdrivercmdstate == DriverCommandState.ALLIANCE_HUB_RIGHT ) {
                                 mhomieState = HomieState.RIGHT;
+                               homieRight();
                                 marmstate = ArmState.ARM_RIGHT;
                             }
-
+                        mliftstate = LiftState.LIFT_HOLD; // move to the next state
                         }
                     break;
 
                 case LIFT_HOLD: // Power high enough to prevent lift from dropping but not high enough to lift it.
-                            juan.setPower(Math.abs(JUAN_SPEED_HOLD));
+                            juan.setPower(Math.abs(JUAN_SPEED_HOLD)); // requires driver to get out of this state
 
                     break;
 
                 case LIFT_DOWN: //
                     if (marmstate != ArmState.ARM_PARKED) {
+                        homieCenter();
                         mhomieState = HomieState.CENTER;
                         marmstate = ArmState.ARM_CENTER;
                     }
@@ -348,11 +349,18 @@ public class BetterStateMachine extends LinearOpMode {
                     }
                     break;
 
+                case ARM_HOLD:
+
+                    julio.setPower(JULIO_SPEED_HOLD + (julioError * julioKp));
+                    mhomieState = HomieState.DRIVER_OPTION;
+
+                    break;
+
                 case ARM_CENTER:
-                    if ((julioPosition -julioTarget) > 50) {
+                    if ((julioPosition -julioTarget) > 15) {
                         julio.setPower((-0.1 + julioError * julioKp));
                     }
-                    else if ((julioPosition -julioTarget) < -50){
+                    else if ((julioPosition -julioTarget) < -15){
                         julio.setPower((0.1+julioError * julioKp));
                     }
 
@@ -362,14 +370,7 @@ public class BetterStateMachine extends LinearOpMode {
 
                     break;
 
-                case ARM_HOLD:
-
-                    julio.setPower(JULIO_SPEED_HOLD + (julioError * julioKp));
-                    mhomieState = HomieState.DRIVER_OPTION;
-
-                    break;
-
-                case ARM_PARKED:
+               case ARM_PARKED:
 
                     //julio.setPower((julioError * julioKp));
                     julio.setPower((0));
@@ -378,25 +379,37 @@ public class BetterStateMachine extends LinearOpMode {
 
             } // end of arm state switch case
 
+            ////////////////////////////  Homie Position Switch Case     ////////////////
             switch (mhomieState){
 
                 case CENTER:
-                    homieBox.setPosition(HOMIEBOXPIVOTCENTER);
+                   // servos do not respond well here. they are very jerky. Possibly due to repeadly calling
+                    // the move servo methods each time through the loop.
+                    // call the method above as we exit the lift case so it the servo move is basically called
+                    // one time
+
                     break;
 
-                case LEFT:
-                    homieBox.setPosition(HOMIEBOXPIVOTLEFT);
+                case LEFT: // the If makes sure the lift is in HOLD before moving the servo.
+                    // without the IF the servo has erratic behavior. It seems that the servo methods get called multipe
+                    // times during the switch case causing jerky "start-stop" behavior. Possibly due to the
+                    // looping through the cases.
+                    if (mliftstate == LiftState.LIFT_HOLD){
+                        homieLeft();
+                    }
 
                 case RIGHT:
-                    homieBox.setPosition(HOMIEBOXPIVOTRIGHT);
+                    if (mliftstate == LiftState.LIFT_HOLD){
+                        homieRight();
+                    }
 
                 case DRIVER_OPTION:
-                    if (gamepad1.right_trigger > 0.25 & marmstate == ArmState.ARM_HOLD & mdrivercmdstate == DriverCommandState.ALLIANCE_HUB_LEFT) {
+                    if (gamepad1.right_trigger > 0.25 & mdrivercmdstate == DriverCommandState.ALLIANCE_HUB_LEFT) {
                         homieDumpArmLeft();
                         telemetry.addData("Homie Dump Left", "Complete ");
                     }
-                    if (gamepad1.right_trigger > 0.25 & marmstate == ArmState.ARM_HOLD & mdrivercmdstate == DriverCommandState.ALLIANCE_HUB_RIGHT) {
-                        homieDumpArmRight(); 
+                    if (gamepad1.right_trigger > 0.25 &  mdrivercmdstate == DriverCommandState.ALLIANCE_HUB_RIGHT) {
+                        homieDumpArmRight();
                         telemetry.addData("Homie Dump Right", "Complete ");
                     }
 
@@ -452,17 +465,31 @@ public class BetterStateMachine extends LinearOpMode {
 
     }
 
-    public void homieDumpArmLeft(){
-        homieBox.setPosition(HOMIEBOXPIVOTRIGHT);
-        sleep(500);
+    public void homieCenter(){
         homieBox.setPosition(HOMIEBOXPIVOTCENTER);
+    }
+
+    public void homieLeft(){
+        homieBox.setPosition(HOMIEBOXPIVOTLEFT);
+        sleep(100);
+    }
+
+    public void homieRight(){
+        homieBox.setPosition(HOMIEBOXPIVOTRIGHT);
+        sleep(100);
+    }
+
+    public void homieDumpArmLeft(){
+        homieRight();
         sleep(500);
+        homieCenter();
+        sleep(100);
     }
 
     public void homieDumpArmRight(){
-        homieBox.setPosition(HOMIEBOXPIVOTLEFT);
+        homieLeft();
         sleep(500);
-        homieBox.setPosition(HOMIEBOXPIVOTCENTER);
-        sleep(500);
+       homieCenter();
+        sleep(100);
     }
 }
