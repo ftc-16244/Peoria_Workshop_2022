@@ -458,7 +458,7 @@ public class BetterStateMachine extends LinearOpMode {
         // will not be be approx zero when the lift is physically at its lowerst point.
         juan.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         juan.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);// make sure to add this after reset to switch out of encoder mode
-        mliftstate = LiftState.MANUAL.LIFT_IDLE;
+        mliftstate = LiftState.LIFT_IDLE;
 
         telemetry.addData("Lift State is",mliftstate);
         telemetry.update();
