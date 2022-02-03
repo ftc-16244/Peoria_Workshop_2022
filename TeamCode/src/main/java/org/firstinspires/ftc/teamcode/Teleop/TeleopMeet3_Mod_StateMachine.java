@@ -480,10 +480,10 @@ public class TeleopMeet3_Mod_StateMachine extends LinearOpMode {
 
 
                     if ((julioPosition -julioTarget) > 15) {
-                        felipe.julioArm.setPower((-0.1 + julioError * felipe.julioKp));
+                        felipe.julioArm.setPower((-0.1 + julioError * felipe.julioKp + armDPower));
                     }
                     else if ((julioPosition -julioTarget) < -15){
-                        felipe.julioArm.setPower((0.1+julioError * felipe.julioKp));
+                        felipe.julioArm.setPower((0.1+julioError * felipe.julioKp * armDPower));
                     }
 
                     else{
