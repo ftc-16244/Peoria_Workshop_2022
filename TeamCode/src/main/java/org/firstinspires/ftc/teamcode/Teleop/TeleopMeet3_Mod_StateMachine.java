@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.Enums.JulioPosition;
 import org.firstinspires.ftc.teamcode.Enums.LiftPosition;
+import org.firstinspires.ftc.teamcode.Enums.LiftState;
 import org.firstinspires.ftc.teamcode.Enums.PatrickState;
 import org.firstinspires.ftc.teamcode.Subsystems.CarouselTurnerThingy;
 import org.firstinspires.ftc.teamcode.Subsystems.Felipe4;
@@ -27,17 +28,21 @@ import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 @TeleOp(name="Meet 3 Teleop Modified FSM",group = "Test")
 public class TeleopMeet3_Mod_StateMachine extends LinearOpMode {
 
-    Felipe4 felipe                      = new Felipe4(this);
-    CarouselTurnerThingy carousel       = new CarouselTurnerThingy();
-    ElapsedTime runtime                 = new ElapsedTime();
+    private Felipe4                 felipe                      = new Felipe4(this);
+    private CarouselTurnerThingy    carousel                    = new CarouselTurnerThingy();
+    private ElapsedTime             runtime                     = new ElapsedTime();
+    private ElapsedTime             lifttime                    = new ElapsedTime(); // used to see how long it takes to lift
+    private ElapsedTime             armtime                     = new ElapsedTime(); // used to see how long it takes the arm to pivot
+    private ElapsedTime             PIDtimer                    = new ElapsedTime(); // used to see how long it takes the arm to pivot
 
-    private LiftState               mliftstate = LiftState.LIFT_IDLE; // "m" = class variable that all methods can share. Not a local variable
-    private ArmState                marmstate = ArmState.ARM_PARKED;
-    private DriverCommandState      mdrivercmdstate = DriverCommandState.UNKNOWN;
-    private HomieState              mhomieState = HomieState.CENTER;
+    private LiftState               mliftstate                  = LiftState.LIFT_IDLE; // "m" = class variable that all methods can share. Not a local variable
+    private ArmState                marmstate                   = ArmState.ARM_PARKED;
+    private DriverCommandState      mdrivercmdstate             = DriverCommandState.UNKNOWN;
+    private HomieState              mhomieState                 = HomieState.CENTER;
+
 
     // ENUMS
-
+/*
     private enum LiftState {
         LIFT_DOWN,
         LIFT_UP,
@@ -48,7 +53,7 @@ public class TeleopMeet3_Mod_StateMachine extends LinearOpMode {
         LIFT_MECH_RESET,
         UNKNOWN
     }
-
+*/
     private enum ArmState {
         ARM_CENTER,
         ARM_LEFT,
@@ -89,6 +94,9 @@ public class TeleopMeet3_Mod_StateMachine extends LinearOpMode {
         felipe.thumbClose();
         felipe.homieCenter();
 
+        double armIPower = 0.2;
+        double armDPower = 0.2;
+
 
         double juanKfCorr; // corrects feed forward for battery voltage
 
@@ -100,8 +108,13 @@ public class TeleopMeet3_Mod_StateMachine extends LinearOpMode {
         int julioTarget = 0;
         int julioError;
 
+        int changeInArmError        = 0;
+        int lastJulioError          = 10;
+        int integralError           = 0;
+
 
         String lifttimestring ="";
+        String armtimestring ="";
 
 
         // forces Juan to mechanical low stop and sets encoders to zero
@@ -129,11 +142,11 @@ public class TeleopMeet3_Mod_StateMachine extends LinearOpMode {
             telemetry.addData("y", poseEstimate.getY());
             telemetry.addData("heading", poseEstimate.getHeading());
 
+            // Calculations to run once per loop
+
             juanKfCorr = (felipe.juanKf *felipe.voltSensor.getVoltage()) /12;
-
             juanPosition = felipe.linearActuator.getCurrentPosition(); // call once before switch to save methods calls.
-            juanLifError = (int) (juanTarget - juanPosition); // cast as an int because target is a double
-
+            juanLifError = juanTarget - juanPosition; // cast as an int because target is a double
             julioPosition = felipe.julioArm.getCurrentPosition(); // call once before switch to save methods calls.
             julioError = (int) (julioTarget - julioPosition); // cast as an int because target is a double
 
@@ -291,7 +304,9 @@ public class TeleopMeet3_Mod_StateMachine extends LinearOpMode {
 
             if (gamepad2.dpad_left) {
                 mdrivercmdstate = DriverCommandState.ALLIANCE_HUB_LEFT;
-
+                juanTarget = (int) (felipe.JUANLIFTPARTIAL * felipe.TICKS_PER_LIFT_IN);
+                julioTarget = (int) (felipe. JULIOARMLEFT     * felipe.TICKS_PER_DEGREE);
+                lifttime.reset();
 
 
             }
@@ -305,7 +320,7 @@ public class TeleopMeet3_Mod_StateMachine extends LinearOpMode {
 
             }
             // by moving the left joystick in either direction the driver takes manual control.
-            if (Math.abs(gamepad1.left_stick_y) > 0.25) {
+            if (Math.abs(gamepad2.left_stick_y) > 0.25) {
                 mliftstate = LiftState.MANUAL;
             }
 
@@ -323,8 +338,7 @@ public class TeleopMeet3_Mod_StateMachine extends LinearOpMode {
                     if (mliftstate == LiftState.LIFT_IDLE | mliftstate == LiftState.LIFT_UP) {
                         mliftstate = LiftState.LIFT_UP;
                     }
-                    juanTarget = (int) (felipe.JUANLIFTPARTIAL * felipe.TICKS_PER_LIFT_IN);
-                    julioTarget = (int) (felipe. JULIOARMLEFT     * felipe.TICKS_PER_DEGREE);
+
 
                     break;
 
@@ -334,7 +348,7 @@ public class TeleopMeet3_Mod_StateMachine extends LinearOpMode {
                     }
                     juanTarget = (int) (felipe.JUANLIFTPARTIAL * felipe.TICKS_PER_LIFT_IN);
                     julioTarget = (int) (felipe. JULIOARMRIGHT     * felipe.TICKS_PER_DEGREE);
-                    //lifttime.reset();
+                    lifttime.reset();
                     break;
 
                 case RELOAD:
@@ -342,7 +356,7 @@ public class TeleopMeet3_Mod_StateMachine extends LinearOpMode {
                     if (mliftstate == LiftState.LIFT_HOLD | mliftstate == LiftState.LIFT_DOWN) {
                         mliftstate = LiftState.LIFT_DOWN;
                     }
-                    //lifttime.reset(); // reset lift time as soon as drive pushes button
+                    lifttime.reset(); // reset lift time as soon as drive pushes button
                     juanTarget = 0;
                     julioTarget = 0;
                     break;
@@ -357,8 +371,8 @@ public class TeleopMeet3_Mod_StateMachine extends LinearOpMode {
                         // is achieved and the driver accidentally pushes the lift up button again.
                         // without this, the motor will power on for the duration of the loop time; 10-20 ms ot so.
                         //felipe.linearActuator.setPower(juanKfCorr + (juanLifError * felipe.juanKp)); // winch type
-                        felipe.linearActuator.setPower(0.95); // screw type
-                        //lifttimestring = lifttime.toString(); // convert lifttime to a string as long as case is active
+                        felipe.linearActuator.setPower(juanKfCorr*felipe.juanKf  +  (juanLifError * felipe.juanKp) ); // screw type
+                        lifttimestring = lifttime.toString(); // convert lifttime to a string as long as case is active
                         // the timer never stops. If timer output is converted to text when we wnat, we just read the last value
                         // becase that is all we care about. It tell us how ling we were in this state. Helpful for tuning.
                     }
@@ -367,10 +381,14 @@ public class TeleopMeet3_Mod_StateMachine extends LinearOpMode {
                         if (mdrivercmdstate == DriverCommandState.ALLIANCE_HUB_LEFT){
                             mhomieState = HomieState.LEFT;
                             //homieLeft(); // command servos directly, they don't like the switch case
+                            armtime.reset();
+                            PIDtimer.reset();
                             marmstate = ArmState.ARM_LEFT;
                         }
                         else if (mdrivercmdstate == DriverCommandState.ALLIANCE_HUB_RIGHT ) {
                             mhomieState = HomieState.RIGHT;
+                            armtime.reset();
+                            PIDtimer.reset();
                             felipe.homieRight();
                             marmstate = ArmState.ARM_RIGHT;
                         }
@@ -391,7 +409,7 @@ public class TeleopMeet3_Mod_StateMachine extends LinearOpMode {
                     }
                     else {
                         felipe.linearActuator.setPower(felipe.JUAN_SPEED_DOWN);
-                        //lifttimestring = lifttime.toString();
+                        lifttimestring = lifttime.toString();
                         // The exit condition for LIFT_DOWN is reaching a very low lift position - no operator input needed
                         if (felipe.linearActuator.getCurrentPosition() < 20) {
                             mliftstate = LiftState.LIFT_IDLE;
@@ -452,7 +470,15 @@ public class TeleopMeet3_Mod_StateMachine extends LinearOpMode {
 
                     break;
 
-                case ARM_CENTER:
+                case ARM_CENTER: // Center needs to bring to center and hold there. When lift is down, it can go into a park mode.
+                    changeInArmError = julioError - lastJulioError; // for the integral term only. Cumulative error tracking
+                    integralError = (int)(integralError  + (julioError * PIDtimer.time()));
+                    armIPower = felipe.julioKi *  integralError;
+                    armDPower = felipe.julioKd * (changeInArmError)/PIDtimer.time();
+                    lastJulioError =  integralError;
+                    PIDtimer.reset();
+
+
                     if ((julioPosition -julioTarget) > 15) {
                         felipe.julioArm.setPower((-0.1 + julioError * felipe.julioKp));
                     }
@@ -516,6 +542,7 @@ public class TeleopMeet3_Mod_StateMachine extends LinearOpMode {
             // Telemetry to troubleshoot switch cases
             //telemetry.addData("Status", "Run Time: " + runtime.toString());
             telemetry.addData("Lift Transition Time", lifttimestring);
+            telemetry.addData("Arm Transition Time", armtimestring);
             telemetry.addData("Lift State is", mliftstate);
             telemetry.addData("Arm State is", marmstate);
             telemetry.addData("Homie State is", mhomieState);
