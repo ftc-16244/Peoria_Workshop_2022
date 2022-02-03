@@ -10,6 +10,7 @@ import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.Enums.LiftPosition;
+import org.firstinspires.ftc.teamcode.Enums.LiftState;
 
 import static java.lang.Thread.sleep;
 import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.hardwareMap;
@@ -33,18 +34,18 @@ public class Felipe4 {
     ElapsedTime runtime = new ElapsedTime();
 
     //Constants Lift
-    public static final double      JUANLIFTSPEED               =   1.0; //
+    public static final double      JUANLIFTSPEED               =   0.9; //
     public static final double      JUAN_SPEED_DOWN             =   -0.2; // power               =   0; // use the LOAD instead of down. Zero pushes wheels off the mat
     public static final double      JUANLIFTPARTIAL             =   5.5;
     public static final int         JUANLIFTLOW                 =   2;
     public static final double      JUANLIFTUP                  =   7.0; //Number is in inches
     public static final double      JUANLIFTLOAD                =   0.3; //Number is in inches
-    public static double            JUAN_SPEED_HOLD             =   0.0; // for screw type
+    public static double            JUAN_SPEED_HOLD             =   0.0; // for screw type this countercats gravity and the weight of the lift
     private static final double     TICKS_PER_MOTOR_REV         =   145.1; // goBilda 1150 RPM motor
     private static final double     ACTUATOR_DISTANCE_PER_REV   = 8/25.4; // 8mm of travel per rev converted to inches
     public static final double      TICKS_PER_LIFT_IN           = TICKS_PER_MOTOR_REV / ACTUATOR_DISTANCE_PER_REV; // 460 and change
     public static double            juanKp                      =   0.0015; //power per tick of error (Juan)
-    public static double            juanKf                      =   0.3; //feed forward for the lift (Juan)
+    public static double            juanKf                      =   0.3; //feed forward for the lift (Juan) to overcome friction (can have gravity in there too to simplify)
 
     public static final double      CRISTIANOCODOINIT =  0.18;
     public static final double      CRISTIANOCODOMID =  0.5;
@@ -55,18 +56,20 @@ public class Felipe4 {
 
 
     //Constants for new motor version of Julio
-    public static final double      JULIOARMLEFT            =   -100.0;
+    public static final double      JULIOARMLEFT            =   -90.0;
     public static final double      JULIOARMLEFT45          =   -65.0;
     public static final double      JULIOARMCENTER          =   0.0;
-    public static final double      JULIOARMRIGHT           =   100.0;
-    public static final double      JULIOARMRIGHT45          =  65.0;
+    public static final double      JULIOARMRIGHT           =   90.0;
+    public static final double      JULIOARMRIGHT45         =  65.0;
     public static final double      JULIOTURNSPEED          =   0.5; // if this goes to fast it bounces back and hits the frame
-    public static final double     JULIO_SPEED_UP              =   0.4; // power to rotate up
+    public static final double      JULIO_SPEED_UP          =   0.4; // power to rotate up
     public static final double      TICKS_PER_REV           =   1425.1; // 117 RPM motor 50.9:1 reduction
-    public static final double      TICKS_PER_DEGREE         =  TICKS_PER_REV/360;
-    public static final double     JULIO_SPEED_HOLD            =   0.10; // power to hold against gravity - check signs
-    public static final double     julioKp                     =  0.00112/2; //power per tick of error (Julio)
-    public static double      julioKf                     =  0.25; //feed forward for the arm - Cosine relationship so not FINAL
+    public static final double      TICKS_PER_DEGREE        =  TICKS_PER_REV/360;
+    public static final double      JULIO_SPEED_HOLD        =   0.10; // power to hold against gravity - check signs
+    public static final double      julioKp                 =  0.00112/2; //power per tick of error (Julio)
+    public static double            julioKf                 =  0.25; //feed forward for the arm - Cosine relationship so not FINAL
+    public static double            julioKi                 =  0.25; //feed forward for th
+    public static double            julioKd                 =  0.0; //derivative
 
     private int newtolerance = 3;       // encodet tick tolerance
 
@@ -82,33 +85,14 @@ public class Felipe4 {
     public static final double      PATRIKINTAKECOFF = 0;
     public static final double      PATRICKINTAKEON = 0.7;
 
-
-    public static final double JULIO_NEW_P = 10; // 2.5
-    public static final double JULIO_NEW_I = 0.5;// 0.1
-    public static final double JULIO_NEW_D = 0.5; // 0.2
-    public static final double JULIO_NEW_F = 10; // 10
-
-    public static final double JUAN_NEW_P = 5; // 2.5
-    public static final double JUAN_NEW_I = 0.5;// 0.1
-    public static final double JUAN_NEW_D = 0.0; // 0.2
-    public static final double JUAN_NEW_F = 20; // 10
-
-    PIDFCoefficients pidJULIO_fNew = new PIDFCoefficients(JULIO_NEW_P, JULIO_NEW_I, JULIO_NEW_D, JULIO_NEW_F);
-    PIDFCoefficients pidJUAN_fNew = new PIDFCoefficients(JUAN_NEW_P, JUAN_NEW_I, JUAN_NEW_D, JUAN_NEW_F);
-
-
-    LiftPosition liftPosition = LiftPosition.UNKNOWN;
+    LiftState mliftstate = LiftState.UNKNOWN;
 
 
     LinearOpMode opmode;
-    //OpMode opmode;
-
-
+    // Constructor with opmode so we can access opmode features
     public Felipe4(LinearOpMode opmode) {
         this.opmode = opmode;
     }
-
-
 
     public void init(HardwareMap hwMap)  {
 
@@ -164,7 +148,7 @@ public class Felipe4 {
     }
     public void liftLoad() {
         liftToTargetHeight(JUANLIFTLOAD,1);
-        liftPosition = LiftPosition.LOAD; // set state accordingly after this is done
+        mliftstate = LiftState.LIFT_IDLE; // set state accordingly after this is done
     }
 
     // get Juan's Position need a local variable to do this
