@@ -35,7 +35,7 @@ public class Felipe4 {
 
     //Constants Lift
     public static final double      JUANLIFTSPEED               =   0.9; //
-    public static final double      JUAN_SPEED_DOWN             =   -0.2; // power               =   0; // use the LOAD instead of down. Zero pushes wheels off the mat
+    public static final double      JUAN_SPEED_DOWN             =   -0.8; // power               =   0; // use the LOAD instead of down. Zero pushes wheels off the mat
     public static final double      JUANLIFTPARTIAL             =   5.5;
     public static final int         JUANLIFTLOW                 =   2;
     public static final double      JUANLIFTUP                  =   7.0; //Number is in inches
@@ -45,7 +45,7 @@ public class Felipe4 {
     private static final double     ACTUATOR_DISTANCE_PER_REV   = 8/25.4; // 8mm of travel per rev converted to inches
     public static final double      TICKS_PER_LIFT_IN           = TICKS_PER_MOTOR_REV / ACTUATOR_DISTANCE_PER_REV; // 460 and change
     public static double            juanKp                      =   0.0015; //power per tick of error (Juan)
-    public static double            juanKf                      =   0.3; //feed forward for the lift (Juan) to overcome friction (can have gravity in there too to simplify)
+    public static double            juanKf                      =   0.5; //feed forward for the lift (Juan) to overcome friction (can have gravity in there too to simplify)
 
     public static final double      CRISTIANOCODOINIT =  0.18;
     public static final double      CRISTIANOCODOMID =  0.5;
@@ -262,14 +262,19 @@ public class Felipe4 {
 
     }
 
-    public void homieRight() {
+    public void homieRight()  {
         homieBox.setPosition(HOMIEBOXPIVOTRIGHT);
+
     }
-    public void homieLeft() {
+    public void homieLeft()  {
+
         homieBox.setPosition(HOMIEBOXPIVOTLEFT);
+
     }
-    public void homieCenter() {
+    public void homieCenter()  {
+
         homieBox.setPosition(HOMIEBOXPIVOTCENTER);
+
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
