@@ -66,11 +66,11 @@ public class Felipe4 {
     public static final double      TICKS_PER_REV           =   1425.1; // 117 RPM motor 50.9:1 reduction
     public static final double      TICKS_PER_DEGREE        =  TICKS_PER_REV/360;
     public static final double      JULIO_SPEED_HOLD        =   0.10; // power to hold against gravity - check signs
-    public static final double      julioKp                 =  0.00112/2; //power per tick of error (Julio)
+    public static final double      julioKp                 =  0.00112/12; //power per tick of error (Julio)
     public static double            julioKf                 =  0.25; //feed forward for the arm - Cosine relationship so not FINAL
     public static double            julioKi                 =  0.25; //feed forward for th
     public static double            julioKd                 =  0.0; //derivative
-
+    public static double            JULIO_PARK_POWER        =  0.15;
     private int newtolerance = 3;       // encodet tick tolerance
 
 
@@ -102,7 +102,7 @@ public class Felipe4 {
         linearActuator = hwMap.get(DcMotor.class,"juanLift");
         linearActuator.setDirection(DcMotor.Direction.FORWARD);
         linearActuator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        linearActuator.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        linearActuator.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
 
 
@@ -148,7 +148,9 @@ public class Felipe4 {
     }
     public void liftLoad() {
         liftToTargetHeight(JUANLIFTLOAD,1);
-        mliftstate = LiftState.LIFT_IDLE; // set state accordingly after this is done
+        linearActuator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        linearActuator.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
     }
 
     // get Juan's Position need a local variable to do this
@@ -171,7 +173,7 @@ public class Felipe4 {
     // Juan mechanical reset use in all opmodes Telop and Auto to reset the encoders
 
     public void juanMechanicalReset(){
-
+        linearActuator.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER); // need to swich off encoder to run with a timer
         linearActuator.setPower(-0.6);
         runtime.reset();
         // opmode is not active during init so take that condition out of the while loop
@@ -180,8 +182,9 @@ public class Felipe4 {
             //Time wasting loop
         }
         // set everything back the way is was before reset so encoders can be used
+        linearActuator.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         linearActuator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        linearActuator.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
 
     }
 
@@ -266,7 +269,7 @@ public class Felipe4 {
         homieBox.setPosition(HOMIEBOXPIVOTRIGHT);
 
     }
-    public void homieLeft()  {
+    public void homieLeft() {
 
         homieBox.setPosition(HOMIEBOXPIVOTLEFT);
 
