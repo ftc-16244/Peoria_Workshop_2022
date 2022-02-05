@@ -269,14 +269,13 @@ public class BetterStateMachine extends LinearOpMode {
 
                     else if (juanPosition >= juanTarget) {
                            if (mdrivercmdstate == DriverCommandState.ALLIANCE_HUB_LEFT){
-                                mhomieState = HomieState.LEFT;
-                               //homieLeft(); // command servos directly, they don't like the switch case
+                               homieLeft(); // command servos directly, they don't like the switch case
                                marmstate = ArmState.ARM_LEFT;
                             }
                            else if (mdrivercmdstate == DriverCommandState.ALLIANCE_HUB_RIGHT ) {
-                                mhomieState = HomieState.RIGHT;
+                               //mhomieState = HomieState.RIGHT;
                                homieRight();
-                                marmstate = ArmState.ARM_RIGHT;
+                               marmstate = ArmState.ARM_RIGHT;
                             }
                         mliftstate = LiftState.LIFT_HOLD; // move to the next state
                         }
