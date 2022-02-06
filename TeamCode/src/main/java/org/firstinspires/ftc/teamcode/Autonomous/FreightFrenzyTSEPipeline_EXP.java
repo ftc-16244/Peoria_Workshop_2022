@@ -29,7 +29,7 @@ public class FreightFrenzyTSEPipeline_EXP extends OpenCvPipeline{
     StartSide startside;
 
 
-    static double PERCENT_COLOR_THRESHOLD = 0.4;
+    static double PERCENT_COLOR_THRESHOLD = 0.2;
 
     // telemetry is part of a LinearOpmde. Since this pipeline does not extend a LinearOpmode
     // telemetry has to be added in the constructor for SkystonePipeline to be able to use it.
