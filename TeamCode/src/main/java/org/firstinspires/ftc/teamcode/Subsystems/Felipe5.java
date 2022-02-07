@@ -58,7 +58,7 @@ public class Felipe5 {
     public static final double      JULIOARMCENTER          =   0.0;
     public static final double      JULIOARMRIGHT           =   90.0;
     public static final double      JULIOARMRIGHT45         =  65.0;
-    public static final double      JULIOTURNSPEED          =   0.5; // if this goes to fast it bounces back and hits the frame
+    public static final double      JULIOTURNSPEED          =   0.4; // if this goes to fast it bounces back and hits the frame
     public static final double      JULIO_SPEED_UP          =   0.4; // power to rotate up
     public static final double      TICKS_PER_REV           =   1425.1; // 117 RPM motor 50.9:1 reduction
     public static final double      TICKS_PER_DEGREE        =  TICKS_PER_REV/360;
@@ -81,6 +81,7 @@ public class Felipe5 {
     public static final double      PATRICKINTAKESLOW = .3;//use this while lifting juan
     public static final double      PATRIKINTAKECOFF = 0;
     public static final double      PATRICKINTAKEON = 0.7;
+    public static final double      PATRICK_INTAKE_HELP_HOMIE = -0.3;//use this while lifting juan
 
     LiftState mliftstate = LiftState.UNKNOWN;
 
@@ -145,8 +146,7 @@ public class Felipe5 {
     }
     public void liftLoad() {
         liftToTargetHeight(JUANLIFTLOAD,1);
-        linearActuator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        linearActuator.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
 
     }
 
@@ -169,18 +169,20 @@ public class Felipe5 {
 
     // Juan mechanical reset use in all opmodes Telop and Auto to reset the encoders
 
-    public void juanMechanicalReset(){
+    public void juanMechanicalReset() throws InterruptedException {
         linearActuator.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER); // need to swich off encoder to run with a timer
-        linearActuator.setPower(-0.6);
+        linearActuator.setPower(-0.4);
         runtime.reset();
         // opmode is not active during init so take that condition out of the while loop
         while ((runtime.seconds() < 2.0)) {
 
             //Time wasting loop
         }
+        sleep(250);
         // set everything back the way is was before reset so encoders can be used
-        linearActuator.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        linearActuator.setPower(0);
         linearActuator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        linearActuator.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
 
     }
@@ -243,6 +245,9 @@ public class Felipe5 {
     }
     public void intakeEject() {
         patrickIntake.setPower(-PATRICKINTAKEON);
+    }
+    public void intakeHelpHomie() {
+        patrickIntake.setPower(PATRICK_INTAKE_HELP_HOMIE);
     }
 
     //Homie the box's methods
