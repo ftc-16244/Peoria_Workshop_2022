@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -33,7 +34,7 @@ public class Felipe5 {
     //Constants Lift
     public static final double      JUANLIFTSPEED               =   0.9; //
     public static final double      JUAN_SPEED_DOWN             =   -0.8; // power               =   0; // use the LOAD instead of down. Zero pushes wheels off the mat
-    public static final double      JUANLIFTPARTIAL             =   5.5;
+    public static final double      JUANLIFTPARTIAL             =   6.0;
     public static final int         JUANLIFTLOW                 =   2;
     public static final double      JUANLIFTUP                  =   7.0; //Number is in inches
     public static final double      JUANLIFTLOAD                =   0.3; //Number is in inches
@@ -59,7 +60,8 @@ public class Felipe5 {
     public static final double      JULIOARMRIGHT           =   90.0;
     public static final double      JULIOARMRIGHT45         =  65.0;
     public static final double      JULIOTURNSPEED          =   0.4; // if this goes to fast it bounces back and hits the frame
-    public static final double      JULIO_SPEED_UP          =   0.4; // power to rotate up
+    public static final double      JULIO_SPEED_UP          =   0.7; // power to rotate up
+    public static final double      JULIO_SPEED_DOWN        =   0.5; // power to rotate up
     public static final double      TICKS_PER_REV           =   1425.1; // 117 RPM motor 50.9:1 reduction
     public static final double      TICKS_PER_DEGREE        =  TICKS_PER_REV/360;
     public static final double      JULIO_SPEED_HOLD        =   0.10; // power to hold against gravity - check signs
@@ -81,7 +83,9 @@ public class Felipe5 {
     public static final double      PATRICKINTAKESLOW = .3;//use this while lifting juan
     public static final double      PATRIKINTAKECOFF = 0;
     public static final double      PATRICKINTAKEON = 0.7;
-    public static final double      PATRICK_INTAKE_HELP_HOMIE = -0.3;//use this while lifting juan
+    public static final double      PATRICK_INTAKE_HELP_HOMIE = 0.3;//use this while lifting juan
+
+
 
     LiftState mliftstate = LiftState.UNKNOWN;
 
@@ -248,6 +252,9 @@ public class Felipe5 {
     }
     public void intakeHelpHomie() {
         patrickIntake.setPower(PATRICK_INTAKE_HELP_HOMIE);
+    }
+    public void intakeHelpLift() {
+        patrickIntake.setPower(PATRICKINTAKESLOW);
     }
 
     //Homie the box's methods
