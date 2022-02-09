@@ -378,9 +378,7 @@ import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
                      juanTarget = (int) (felipe.JUANLIFTPARTIAL * felipe.TICKS_PER_LIFT_IN); // for telemetry
                      felipe.linearActuator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                      felipe.linearActuator.setPower(felipe.JUANLIFTSPEED);
-                     felipe.intakeHelpLift();
-                     patrickState = PatrickState.COLLECT;
-                    // no exit condition within this case....a change in the driver command will get you out of here
+
                      break;
 
                  case LIFT_DOWN:
@@ -471,7 +469,7 @@ import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
              // when lift is no longer busy (! symbol), go ahead and advance the arm to the rotate state.
              // The arm lowers the freight box "Homie" in between the frame rails. The arm will hit the frame
              // unless it is lifted up about 6 inches first. THus a lot of sequencing is required.
-             if(!felipe.linearActuator.isBusy() && mdrivercmdstate == DriverCommandState.ALLIANCE_HUB_LEFT) {
+             if(felipe.linearActuator.getCurrentPosition() > 2000 && mdrivercmdstate == DriverCommandState.ALLIANCE_HUB_LEFT) {
                  marmstate = ArmState.ARM_LEFT_ALLIANCE;
              }
 
