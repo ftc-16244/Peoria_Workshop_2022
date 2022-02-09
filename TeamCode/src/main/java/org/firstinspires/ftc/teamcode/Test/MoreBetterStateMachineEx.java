@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.Enums.JulioPosition;
 import org.firstinspires.ftc.teamcode.Enums.LiftState;
 import org.firstinspires.ftc.teamcode.Enums.PatrickState;
 import org.firstinspires.ftc.teamcode.Subsystems.CarouselTurnerThingy;
@@ -27,7 +28,7 @@ import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
  @TeleOp(name="More Better State Machine Test",group = "Test")
  public class MoreBetterStateMachineEx extends LinearOpMode {
      private final FtcDashboard dashboard = FtcDashboard.getInstance();
-     private Felipe5                felipe                      = new Felipe5(this);
+     private Felipe5                 felipe                      = new Felipe5(this);
      private CarouselTurnerThingy    carousel                   = new CarouselTurnerThingy();
      private ElapsedTime             runtime                    = new ElapsedTime();
      private ElapsedTime             lifttime                   = new ElapsedTime(); // used to see how long it takes to lift
@@ -38,7 +39,7 @@ import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
      private LiftState               mliftstate                 = LiftState.LIFT_IDLE; // "m" = class variable that all methods can share. Not a local variable
      private ArmState                marmstate                  = ArmState.UNKNOWN;
      private DriverCommandState      mdrivercmdstate            = DriverCommandState.UNKNOWN;
-     private HomieState              mhomieState                = HomieState.NONE;
+
 
      private int                TELEOP_TIME_OUT                 = 125;
 
@@ -60,14 +61,17 @@ import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
          LIFT_UP_AND_HOLD,
          LIFT_IDLE,
          MANUAL,
+         LIFT_SHARED_HUB_DROP,
          LIFT_MECH_RESET,
          UNKNOWN
      }
 
      private enum ArmState {
          ARM_CENTER_ROTATE,
-         ARM_LEFT_ROTATE,
-         ARM_RIGHT_ROTATE,
+         ARM_LEFT_ALLIANCE,
+         ARM_RIGHT_ALLIANCE,
+         ARM_LEFT_SHARRED,
+         ARM_RIGHT_SHARRED,
          ARM_IDLE,
          UNKNOWN
 
@@ -77,19 +81,13 @@ import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
          RELOAD,
          ALLIANCE_HUB_LEFT,
          ALLIANCE_HUB_RIGHT,
-         SHARED_HUB_LEFt,
+         SHARED_HUB_LEFT,
          SHARED_HUB_RIGHT,
          UNKNOWN
      }
 
-     private enum HomieState{
-         LEFT,
-         RIGHT,
-         CENTER,
-         DRIVER_OPTION,
-         NONE
-     }
-     //DriveSpeedState  currDriveState;
+
+
      PatrickState patrickState = PatrickState.OFF;
 
 
@@ -104,13 +102,9 @@ import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
          felipe.thumbClose();
          felipe.homieCenter();
 
-         double armIPower = 0.2;
-         double armDPower = 0.2;
+         // local variable that only works inside "runOpmode" it is not shared outside
 
-
-         double juanKfCorr; // corrects feed forward for battery voltage
-         double julioParkPowerCOrr;
-         int juanPosition = 0; // local variable that only works inside "runOpmode" it is not shared to other methods
+         int juanPosition = 0;
          int juanTarget = 0;
          int juanLifError;
 
@@ -122,11 +116,6 @@ import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
          String lifttimestring ="";
          String armtimestring ="";
 
-
-
-
-         // forces Juan to mechanical low stop and sets encoders to zero
-        //felipe.juanMechanicalReset();
         telemetry.addData("Lift Resetting", "Complete");
         telemetry.update();
          // this just changes the state. It does not drive any action
@@ -153,22 +142,17 @@ import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
          telemetry.update();
 
          telemetry = new MultipleTelemetry(telemetry,dashboard.getTelemetry());
+
+
+         // forces Juan to mechanical low stop and sets encoders to zero
+         felipe.juanMechanicalReset();// commented out for testing. Remove comment for competiton
          ////////////////////////////////////////////////////////////////////////////////////////////
          // WAIT FOR MATCH TO START
          ///////////////////////////////////////////////////////////////////////////////////////////
          waitForStart();
-
-
-
-
-
-
-         //felipe.liftLoad();
+         felipe.liftLoad(); // commented out for testing. Remove comment for competiton
 
          telemetry.addData("Encoder Reset to ",felipe.linearActuator.getCurrentPosition());
-
-
-
 
          while (!isStopRequested()  &&  teleopTimer.seconds() < TELEOP_TIME_OUT ) {
              drive.setWeightedDrivePower(
@@ -179,30 +163,32 @@ import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
                      )
              );
 
-             // Calculations to run once per loop
-             julioParkPowerCOrr = felipe.JULIO_PARK_POWER *12 / felipe.voltSensor.getVoltage();
-             juanKfCorr = (felipe.juanKf * 12/ felipe.voltSensor.getVoltage());
-             juanPosition = felipe.linearActuator.getCurrentPosition(); // call once before switch to save methods calls.
-             juanLifError = juanTarget - juanPosition; // cast as an int because target is a double
-             julioPosition = felipe.julioArm.getCurrentPosition(); // call once before switch to save methods calls.
-             julioError = (int) (julioTarget - julioPosition); // cast as an int because target is a double
-
              Pose2d poseEstimate = drive.getPoseEstimate();
              telemetry.addData("x", poseEstimate.getX());
              telemetry.addData("y", poseEstimate.getY());
              telemetry.addData("heading", poseEstimate.getHeading());
 
+             // Helper variables computed each loop
+
+             juanPosition       = felipe.linearActuator.getCurrentPosition(); // call once before switch to save methods calls.
+             juanLifError       = juanTarget - juanPosition; // target is a double, position in an int
+             julioPosition      = felipe.julioArm.getCurrentPosition(); // call once before switch to save methods calls.
+             julioError         = julioTarget - julioPosition;
 
              //////////////////////////////////////////////
              // Gampepad 1 Functions///////////////////////
              /////////////////////////////////////////////
 
+             /**
+              *
+              * Gamepad #1  - Bumpers - Intake
+              **/
              if (gamepad1.left_bumper && patrickState == PatrickState.OFF) {
                  felipe.intakeOn();
                  felipe.homieCenter();
                  patrickState = PatrickState.COLLECT;
                  telemetry.addData("Collector State", patrickState);
-                 debounce(175); // need to pause for a few ms to let drive release the button
+                 debounce(175); // need to pause for a few ms to let driver release the button
 
              }
              if (gamepad1.left_bumper && patrickState == PatrickState.COLLECT) {
@@ -236,39 +222,56 @@ import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 
              /**
               *
-              * Gamepad #1  - Buttons       *
+              * Gamepad #1  - Buttons Shared Hub controls       *
               **/
 
-
-
-
-             // Carousel Functions
-             if (gamepad1.x) {
-                 carousel.carouselTurnCCW();
-                 telemetry.addData("Turning CCW", "Complete ");
+             if (gamepad1.x && mdrivercmdstate == DriverCommandState.ALLIANCE_HUB_LEFT) {
+                 mdrivercmdstate = DriverCommandState. SHARED_HUB_LEFT;
              }
-             if (gamepad1.b) {
-                 carousel.carouselTurnCW();
-                 telemetry.addData("Turning CW", "Complete ");
+             if (gamepad1.b && mdrivercmdstate == DriverCommandState.ALLIANCE_HUB_RIGHT) {
+                 mdrivercmdstate = DriverCommandState. SHARED_HUB_RIGHT;
              }
              if (gamepad1.y) {
-                 carousel.carouselTurnOff();
-                 telemetry.addData("Turning Off", "Complete ");
+
              }
 
              if (gamepad1.a) {
-                 felipe.homieCenter();
+
 
              }
              /**
               *
-              * Gamepad #1 Back Buttons
+              * Gamepad #1 Back Button
               *
               **/
 
              if (gamepad1.back) {
                  felipe.julioArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                 felipe.julioArm.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                 felipe.julioArm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+             }
+            /**
+             *
+             **/
+
+             if (gamepad1.right_trigger > 0.25 && (mdrivercmdstate == DriverCommandState.ALLIANCE_HUB_LEFT | mdrivercmdstate == DriverCommandState.SHARED_HUB_LEFT)) {
+                 felipe.homieRight();
+                 sleep(500);
+                 felipe.homieCenter();
+                 sleep(500);
+                 //debounce(400);
+                 sleep(500);
+                 felipe.homieCenter();
+                 telemetry.addData("Homie Dump Left", "Complete ");
+             }
+
+             if (gamepad1.right_trigger > 0.25 && (mdrivercmdstate == DriverCommandState.ALLIANCE_HUB_RIGHT | mdrivercmdstate == DriverCommandState.SHARED_HUB_RIGHT)) {
+                 felipe.homieLeft();
+                 sleep(500);
+                 felipe.homieCenter();
+                 sleep(500);
+                 telemetry.addData("Homie Dump Right", "Complete ");
+
+
              }
 
 
@@ -281,7 +284,10 @@ import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
               * Gamepad #2  - Buttons       *
               **/
 
-
+             // Button names and positions
+             //        y
+             //      x   b
+             //        a
 
              // Carousel Functions
              if (gamepad2.x) {
@@ -297,33 +303,34 @@ import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
                  telemetry.addData("Turning Off", "Complete ");
              }
 
-             //double juanpower = -gamepad1.left_stick_y;
-             //double juliopower = gamepad1.right_stick_x;
 
-
- /////////////// Game Pad 1 Assignments /////////////////////////
-             // Button names and positions
-             //        y
-             //      x   b
-             //        a
-
+             /**
+              *
+              * Gamepad #2  - Dpad - Lift and Arm Control      *
+              **/
 
              if (gamepad2.dpad_left) {
-
                  mdrivercmdstate = DriverCommandState.ALLIANCE_HUB_LEFT;
-
              }
 
              if (gamepad2.dpad_right) {
                  mdrivercmdstate = DriverCommandState.ALLIANCE_HUB_RIGHT;
-
              }
              if (gamepad2.dpad_down) {
                  mdrivercmdstate =  DriverCommandState.RELOAD;
-
              }
-             // by moving the left joystick in either direction the driver takes manual control.
 
+             /**
+              *
+              * Gamepad #2  - Dpad - Homie Rotate Control      *
+              **/
+             if (gamepad2.left_trigger > 0.25 && felipe.linearActuator.getCurrentPosition() > 600 && mdrivercmdstate == DriverCommandState.ALLIANCE_HUB_LEFT) {
+                 felipe.homieRight();
+             }
+
+             if (gamepad2.left_trigger > 0.25 &&  felipe.linearActuator.getCurrentPosition() > 600 && mdrivercmdstate == DriverCommandState.ALLIANCE_HUB_RIGHT) {
+                 felipe.homieLeft();
+             }
 
              ////////////////////////////  Driver Input Switch Case     ////////////////
 
@@ -331,7 +338,7 @@ import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 
                  case ALLIANCE_HUB_LEFT:
                  case ALLIANCE_HUB_RIGHT:
-                     // This if statement prevents repeated setting the target
+                     // This if statement prevents repeatedly setting the target and run to positions
                      if (mliftstate != LiftState.LIFT_UP_AND_HOLD) {
                          mliftstate = LiftState.LIFT_UP_AND_HOLD;
                      }
@@ -342,18 +349,38 @@ import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
                          marmstate = ArmState.ARM_CENTER_ROTATE; // this has to go first
                      }
                      break;
+                 case SHARED_HUB_LEFT:
+                     // This if statement makes sure the arm is on the left before lowering. It prevents crashes
+                     if (marmstate == ArmState.ARM_LEFT_ALLIANCE) {
+                         marmstate = ArmState.ARM_LEFT_SHARRED;
+                     }
+                     break;
+
+                 case SHARED_HUB_RIGHT:
+                     // This if statement makes sure the arm is on the right before lowering. It prevents crashes
+                     if (marmstate == ArmState.ARM_RIGHT_ALLIANCE) {
+                         marmstate = ArmState.ARM_RIGHT_SHARRED;
+                     }
+                     break;
+
+
              } // end of Driver control switch
 
              ////////////////////////////  Lift State Switch Case     ////////////////
 
              switch (mliftstate) {
+                 // Lift an hold are combined because RUN TO POSITION does just that.
+                 // This case is only accessed the first loop after the driver selects "left alliance"
+                 // because don't want to keep repeating the target set and run to position each time through the while loop.
 
                  case LIFT_UP_AND_HOLD:
                      felipe.setJuanToPartial(); // method that sets target position
                      juanTarget = (int) (felipe.JUANLIFTPARTIAL * felipe.TICKS_PER_LIFT_IN); // for telemetry
                      felipe.linearActuator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                      felipe.linearActuator.setPower(felipe.JUANLIFTSPEED);
-
+                     felipe.intakeHelpLift();
+                     patrickState = PatrickState.COLLECT;
+                    // no exit condition within this case....a change in the driver command will get you out of here
                      break;
 
                  case LIFT_DOWN:
@@ -363,7 +390,9 @@ import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
                      felipe.linearActuator.setPower(felipe.JUANLIFTSPEED);
 
 
+
                      break;
+
                  case LIFT_IDLE:
                      // Not used yet
 
@@ -375,15 +404,14 @@ import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 
              switch (marmstate){
 
-                 case  ARM_LEFT_ROTATE:
-
-                     felipe.julioArm.setTargetPosition((int)(felipe.JULIOARMLEFT * felipe.TICKS_PER_DEGREE));
+                 case  ARM_LEFT_ALLIANCE:
+                     felipe.julioArm.setTargetPosition((int) (felipe.JULIOARMLEFT * felipe.TICKS_PER_DEGREE));
                      julioTarget = (int) (felipe.JULIOARMLEFT * felipe.TICKS_PER_DEGREE); // for telemetry
                      felipe.julioArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                      felipe.julioArm.setPower(felipe.JULIO_SPEED_UP);
 
                      break;
-                 case  ARM_RIGHT_ROTATE:
+                 case  ARM_RIGHT_ALLIANCE:
 
                      felipe.julioArm.setTargetPosition((int)(felipe.JULIOARMRIGHT * felipe.TICKS_PER_DEGREE));
                      julioTarget = (int) (felipe.JULIOARMRIGHT * felipe.TICKS_PER_DEGREE); // for telemetry
@@ -398,6 +426,9 @@ import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
                      julioTarget = (int) (felipe. JULIOARMCENTER  * felipe.TICKS_PER_DEGREE); // for telemetry it is just zero
                      felipe.julioArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                      felipe.julioArm.setPower(felipe.JULIO_SPEED_DOWN);
+                     felipe.intakeOff();
+                     patrickState = PatrickState.OFF;
+
 
                      break;
 
@@ -405,22 +436,47 @@ import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 
                      felipe.julioArm.setPower(0);
 
+                     //cant put intake off here becase it will not turn on with driver control
+
                      break;
+
+                 case  ARM_LEFT_SHARRED:
+
+                     felipe.julioArm.setTargetPosition((int)(felipe.JULIOARMLEFT45 * felipe.TICKS_PER_DEGREE));
+                     julioTarget = (int) (felipe.JULIOARMLEFT45 * felipe.TICKS_PER_DEGREE); // for telemetry
+                     felipe.julioArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                     felipe.julioArm.setPower(felipe.JULIO_SPEED_UP);
+
+
+                     break;
+                 case  ARM_RIGHT_SHARRED:
+
+                     felipe.julioArm.setTargetPosition((int)(felipe.JULIOARMRIGHT45 * felipe.TICKS_PER_DEGREE));
+                     julioTarget = (int) (felipe.JULIOARMRIGHT45 * felipe.TICKS_PER_DEGREE); // for telemetry
+                     felipe.julioArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                     felipe.julioArm.setPower(felipe.JULIO_SPEED_UP);
+
+
+                     break;
+
+
 
 
 
              } // end of arm state switch case
 
 
-             ////////////////////////////  Checks to make comparisons and drive actions between the lift and arm FSM's.     ////////////////
+             ////////////////////////////  Lift and Arm position and state checks to sequence the movements correctly and avoid crashes.     ////////////////
 
              // when lift is no longer busy (! symbol), go ahead and advance the arm to the rotate state.
+             // The arm lowers the freight box "Homie" in between the frame rails. The arm will hit the frame
+             // unless it is lifted up about 6 inches first. THus a lot of sequencing is required.
              if(!felipe.linearActuator.isBusy() && mdrivercmdstate == DriverCommandState.ALLIANCE_HUB_LEFT) {
-                 marmstate = ArmState.ARM_LEFT_ROTATE;
+                 marmstate = ArmState.ARM_LEFT_ALLIANCE;
              }
 
              if(!felipe.linearActuator.isBusy() && mdrivercmdstate == DriverCommandState.ALLIANCE_HUB_RIGHT) {
-                 marmstate = ArmState.ARM_RIGHT_ROTATE; // when lift is no longer busy (! symbol), go ahead and advance the arm to the rotate state.
+                 marmstate = ArmState.ARM_RIGHT_ALLIANCE; // when lift is no longer busy (! symbol), go ahead and advance the arm to the rotate state.
              }
 
              // when RELOAD is called for, don't lower the lift until arm is centered.
@@ -432,17 +488,19 @@ import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
                  marmstate = ArmState.ARM_IDLE;
              }
 
-             if(felipe.linearActuator.getCurrentPosition() > 375 && felipe.linearActuator.getCurrentPosition() < 800 && mdrivercmdstate == DriverCommandState.RELOAD) {
-                 felipe.intakeHelpHomie();
+
+             //if(felipe.linearActuator.getCurrentPosition() > 375 && felipe.linearActuator.getCurrentPosition() < 800 && mdrivercmdstate == DriverCommandState.RELOAD) {
+               //  felipe.intakeHelpHomie();
+             //}
+
+             //if(felipe.linearActuator.getCurrentPosition() > 300 && felipe.linearActuator.getCurrentPosition() < 350 && mdrivercmdstate == DriverCommandState.RELOAD) {
+               //  felipe.intakeOff();
+             //}
+
+             if(Math.abs(julioError) <= 20 && mdrivercmdstate == DriverCommandState.SHARED_HUB_LEFT | mdrivercmdstate == DriverCommandState.SHARED_HUB_RIGHT){
+                mliftstate = LiftState.LIFT_DOWN;
              }
 
-             if(felipe.linearActuator.getCurrentPosition() > 300 && felipe.linearActuator.getCurrentPosition() < 350 && mdrivercmdstate == DriverCommandState.RELOAD) {
-                 felipe.intakeOff();
-             }
-
-             if(felipe.linearActuator.getCurrentPosition() > 200 && felipe.linearActuator.getCurrentPosition() < 600 && mdrivercmdstate == DriverCommandState.SHARED_HUB_LEFt) {
-                 felipe.intakeHelpLift();
-             }
 
              // For a cascade lift, add a kill power also. We dont need that command with the linear actuator.
 
