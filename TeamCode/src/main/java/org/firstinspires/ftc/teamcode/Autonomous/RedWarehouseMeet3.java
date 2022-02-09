@@ -119,7 +119,7 @@ public class RedWarehouseMeet3 extends LinearOpMode {
                 .lineToLinearHeading(new Pose2d(-4,-2,Math.toRadians(-90)))
                 .build();
         Trajectory  traj5mid = drive.trajectoryBuilder(traj4mid.end())
-                .forward(29)
+                .forward(28)
                 .build();
         Trajectory  traj6mid = drive.trajectoryBuilder(traj5mid.end())
                 .strafeLeft(25)
@@ -143,7 +143,7 @@ public class RedWarehouseMeet3 extends LinearOpMode {
                 .lineToLinearHeading(new Pose2d(-4,-2,Math.toRadians(-90)))
                 .build();
         Trajectory  traj5low = drive.trajectoryBuilder(traj4low.end())
-                .forward(29)
+                .forward(28)
                 .build();
         Trajectory  traj6low = drive.trajectoryBuilder(traj5low.end())
                 .strafeLeft(25)

@@ -96,8 +96,13 @@ public class FreightFrenzyTSEPipeline_EXP extends OpenCvPipeline{
         }
         // Use a webcam and the GRIP software to tune these values off the robot. It will save a lot of time.
         // GRIP is a free download.
-        Scalar lowHSV = new Scalar(69, 59,  57); // for cyan smaller H allows more green
-        Scalar highHSV = new Scalar(104, 300, 179); // for cyan larger H allows more blue. If too much blue is allowed the blue floor tape is detected.
+        // For Ol "Party Hat" TSE that is mre Teal Green
+        //Scalar lowHSV = new Scalar(69, 59,  57); // for cyan smaller H allows more green
+        //Scalar highHSV = new Scalar(104, 300, 179); // for cyan larger H allows more blue. If too much blue is allowed the blue floor tape is detected.
+
+        // For new multitude of TSE's that are basically John Deere Green
+        Scalar lowHSV = new Scalar(42, 117,  0);
+        Scalar highHSV = new Scalar(100, 255, 255);
 
         // takes the values that are between lowHSV and highHSV only
         Core.inRange(mat, lowHSV, highHSV, mat);
