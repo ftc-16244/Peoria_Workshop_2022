@@ -31,20 +31,22 @@ public class Felipe5 {
 
     ElapsedTime runtime = new ElapsedTime();
 
-    //Constants Lift
-    public static final double      JUANLIFTSPEED               =   0.9; //
-    public static final double      JUAN_SPEED_DOWN             =   -0.8; // power               =   0; // use the LOAD instead of down. Zero pushes wheels off the mat
-    public static final double      JUANLIFTPARTIAL             =   6.0;
-    public static final int         JUANLIFTLOW                 =   2;
-    public static final double      JUANLIFTUP                  =   7.0; //Number is in inches
+    public static final double      SLOWDRIVEFACTOR             =   0.35;
+
+    //Constants fir Juan the Lift
+    public static final double      JUANLIFTSPEED               =   0.9; // for up and down on linear actuator and PID control
+    public static final double      JUANLIFTPARTIAL             =   5.75; // Alliance hub height
+    public static final double      JUAN_OK_ARM_PIVOT_HT        =   5.0;
+    public static final double      JUANLIFTUP                  =   7.0; //Number is in inches used in auto
     public static final double      JUANLIFTLOAD                =   0.3; //Number is in inches
     public static double            JUAN_SPEED_HOLD             =   0.0; // for screw type this countercats gravity and the weight of the lift
     private static final double     TICKS_PER_MOTOR_REV         =   145.1; // goBilda 1150 RPM motor
-    private static final double     ACTUATOR_DISTANCE_PER_REV   = 8/25.4; // 8mm of travel per rev converted to inches
-    public static final double      TICKS_PER_LIFT_IN           = TICKS_PER_MOTOR_REV / ACTUATOR_DISTANCE_PER_REV; // 460 and change
-    public static double            juanKp                      =   0.0015; //power per tick of error (Juan)
-    public static double            juanKf                      =   0.5; //feed forward for the lift (Juan) to overcome friction (can have gravity in there too to simplify)
+    private static final double     ACTUATOR_DISTANCE_PER_REV   =   8/25.4; // 8mm of travel per rev converted to inches
+    public static final double      TICKS_PER_LIFT_IN           =   TICKS_PER_MOTOR_REV / ACTUATOR_DISTANCE_PER_REV; // 460 and change
+    public static final int         JUAN_OK_2_PIVOT_TICKS       =   (int) JUAN_OK_ARM_PIVOT_HT * (int)TICKS_PER_LIFT_IN;
 
+
+    //Constants for Auto frieght arm and gripper
     public static final double      CRISTIANOCODOINIT =  0.18;
     public static final double      CRISTIANOCODOMID =  0.5;
     public static final double      CRISTIANOCODOLOW =  0.7;
@@ -53,33 +55,33 @@ public class Felipe5 {
     public static final double      PANCHOPULGARCLOSE =  0.525;
 
 
-    //Constants for new motor version of Julio
+    //Constants for new motor version of Julio Arm
     public static final double      JULIOARMLEFT            =   -90.0;
     public static final double      JULIOARMLEFT45          =   -65.0;
     public static final double      JULIOARMCENTER          =   0.0;
     public static final double      JULIOARMRIGHT           =   90.0;
-    public static final double      JULIOARMRIGHT45         =  65.0;
+    public static final double      JULIOARMRIGHT45         =   65.0;
     public static final double      JULIOTURNSPEED          =   0.4; // if this goes to fast it bounces back and hits the frame
     public static final double      JULIO_SPEED_UP          =   0.7; // power to rotate up
     public static final double      JULIO_SPEED_DOWN        =   0.5; // power to rotate up
     public static final double      TICKS_PER_REV           =   1425.1; // 117 RPM motor 50.9:1 reduction
     public static final double      TICKS_PER_DEGREE        =  TICKS_PER_REV/360;
     public static final double      JULIO_SPEED_HOLD        =   0.10; // power to hold against gravity - check signs
-    public static final double      julioKp                 =  0.00112/12; //power per tick of error (Julio)
-    public static double            julioKf                 =  0.25; //feed forward for the arm - Cosine relationship so not FINAL
-    public static double            julioKi                 =  0.25; //feed forward for th
-    public static double            julioKd                 =  0.0; //derivative
-    public static double            JULIO_PARK_POWER        =  0.15;
+    public static final double      julioKp                 =   0.00112/12; //power per tick of error (Julio)
+    public static double            julioKf                 =   0.25; //feed forward for the arm - Cosine relationship so not FINAL
+    public static double            julioKi                 =   0.25; //feed forward for th
+    public static double            julioKd                 =   0.0; //derivative
+    public static double            JULIO_PARK_POWER        =   0.15;
     private int newtolerance = 3;       // encodet tick tolerance
 
 
-    //Constants for robot home box
+    //Constants for freight box - Homie
     public static final double      HOMIEBOXPIVOTLEFT       = 1;
     public static final double      HOMIEBOXPIVOTRIGHT      = 0.3;
     public static final double      HOMIEBOXPIVOTCENTER     = 0.66;
-    public static final double      HOMIEDELAY              = 0.15;
+    public static final double      HOMIE_OK_2_PIVOT_HT     = 1200; // ticks
 
-    //Constants for robot intake
+    //Constants for robot intake - Patrick
     public static final double      PATRICKINTAKESLOW = .3;//use this while lifting juan
     public static final double      PATRIKINTAKECOFF = 0;
     public static final double      PATRICKINTAKEON = 0.7;
@@ -105,7 +107,6 @@ public class Felipe5 {
         linearActuator.setDirection(DcMotor.Direction.FORWARD);
         linearActuator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         linearActuator.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
 
 
         //Initialize Patrick which is the intake drive motor
@@ -146,6 +147,7 @@ public class Felipe5 {
         liftToTargetHeight(JUANLIFTUP ,3);
     }
     public void liftPartial() {
+
         liftToTargetHeight(JUANLIFTPARTIAL ,3);
     }
     public void liftLoad() {
@@ -175,7 +177,7 @@ public class Felipe5 {
 
     public void juanMechanicalReset() throws InterruptedException {
         linearActuator.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER); // need to swich off encoder to run with a timer
-        linearActuator.setPower(-0.4);
+        linearActuator.setPower(-0.3);
         runtime.reset();
         // opmode is not active during init so take that condition out of the while loop
         while ((runtime.seconds() < 2.0)) {
@@ -250,11 +252,11 @@ public class Felipe5 {
     public void intakeEject() {
         patrickIntake.setPower(-PATRICKINTAKEON);
     }
-    public void intakeHelpHomie() {
+    public void intakeHelpLowwer() {
         patrickIntake.setPower(PATRICK_INTAKE_HELP_HOMIE);
     }
     public void intakeHelpLift() {
-        patrickIntake.setPower(PATRICKINTAKESLOW);
+        patrickIntake.setPower(-PATRICKINTAKESLOW);
     }
 
     //Homie the box's methods
