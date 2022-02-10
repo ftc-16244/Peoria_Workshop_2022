@@ -9,7 +9,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.CarouselTurnerThingy;
 import org.firstinspires.ftc.teamcode.Subsystems.FelipeTrois;
 @TeleOp(group = "Test")
 @Disabled
-//@Disabled
+
 public class PidTester extends LinearOpMode {
 
 

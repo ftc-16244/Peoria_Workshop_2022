@@ -3,17 +3,15 @@
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.Enums.JulioPosition;
-import org.firstinspires.ftc.teamcode.Enums.LiftState;
 import org.firstinspires.ftc.teamcode.Enums.PatrickState;
 import org.firstinspires.ftc.teamcode.Subsystems.CarouselTurnerThingy;
-import org.firstinspires.ftc.teamcode.Subsystems.Felipe4;
 import org.firstinspires.ftc.teamcode.Subsystems.Felipe5;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 
@@ -25,7 +23,9 @@ import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
   * exercise is to ascertain whether the localizer has been configured properly (note: the pure
   * encoder localizer heading may be significantly off if the track width has not been tuned).
   */
+
  @TeleOp(name="More Better State Machine Test",group = "Test")
+ @Disabled
  public class MoreBetterStateMachineEx extends LinearOpMode {
      private final FtcDashboard dashboard = FtcDashboard.getInstance();
      private Felipe5                 felipe                      = new Felipe5(this);
@@ -41,7 +41,7 @@ import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
      private DriverCommandState      mdrivercmdstate            = DriverCommandState.UNKNOWN;
 
 
-     private int                TELEOP_TIME_OUT                 = 125;
+     private int                    TELEOP_TIME_OUT             = 130;
 
      public static final double NEW_P = 7;//10 orig
      public static final double NEW_I = 1.0;//0.5
@@ -50,28 +50,20 @@ import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
      public int tol;
      public int newtolerance = 3;
 
-
-
-
-
      // ENUMS
-
+    // there is another Liftstate in the ENUMS...need to clean up
      private enum LiftState {
          LIFT_DOWN,
          LIFT_UP_AND_HOLD,
-         LIFT_IDLE,
-         MANUAL,
-         LIFT_SHARED_HUB_DROP,
-         LIFT_MECH_RESET,
-         UNKNOWN
+         LIFT_IDLE
      }
 
      private enum ArmState {
          ARM_CENTER_ROTATE,
          ARM_LEFT_ALLIANCE,
          ARM_RIGHT_ALLIANCE,
-         ARM_LEFT_SHARRED,
-         ARM_RIGHT_SHARRED,
+         ARM_LEFT_SHARED,
+         ARM_RIGHT_SHARED,
          ARM_IDLE,
          UNKNOWN
 
@@ -86,9 +78,15 @@ import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
          UNKNOWN
      }
 
+     private enum DriveSpeedState {
+         FAST,
+         SLOW
+     }
 
 
-     PatrickState patrickState = PatrickState.OFF;
+
+     PatrickState       patrickState = PatrickState.OFF;
+     DriveSpeedState    mdriveSpeedState  = DriveSpeedState.FAST;
 
 
      @Override
@@ -111,6 +109,8 @@ import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
          int julioPosition = 0;
          int julioTarget = 0;
          int julioError;
+
+         double maxVel;
 
 
          String lifttimestring ="";
@@ -155,13 +155,28 @@ import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
          telemetry.addData("Encoder Reset to ",felipe.linearActuator.getCurrentPosition());
 
          while (!isStopRequested()  &&  teleopTimer.seconds() < TELEOP_TIME_OUT ) {
-             drive.setWeightedDrivePower(
-                     new Pose2d(
-                             -gamepad1.left_stick_y,
-                             -gamepad1.left_stick_x,
-                             -gamepad1.right_stick_x
-                     )
-             );
+
+             switch ( mdriveSpeedState){
+                 case SLOW:
+                     drive.setWeightedDrivePower(
+                             new Pose2d(
+                                     -gamepad1.left_stick_y * Felipe5.SLOWDRIVEFACTOR,
+                                     -gamepad1.left_stick_x * Felipe5.SLOWDRIVEFACTOR,
+                                     -gamepad1.right_stick_x * Felipe5.SLOWDRIVEFACTOR
+                             )
+                     );
+                 break;
+
+                 case FAST:
+                     drive.setWeightedDrivePower(
+                             new Pose2d(
+                                     -gamepad1.left_stick_y,
+                                     -gamepad1.left_stick_x,
+                                     -gamepad1.right_stick_x
+                             )
+                     );
+
+             } // end of drive speed switch
 
              Pose2d poseEstimate = drive.getPoseEstimate();
              telemetry.addData("x", poseEstimate.getX());
@@ -178,6 +193,20 @@ import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
              //////////////////////////////////////////////
              // Gampepad 1 Functions///////////////////////
              /////////////////////////////////////////////
+
+             /**
+              *
+              * Gamepad #1  - Joystick Buttons - Drive Speed Modes
+              **/
+
+             if(gamepad1.left_stick_button){
+                 mdriveSpeedState = DriveSpeedState.FAST;
+             }
+
+             if(gamepad1.right_stick_button){
+                 mdriveSpeedState = DriveSpeedState.SLOW;
+             }
+
 
              /**
               *
@@ -255,10 +284,8 @@ import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 
              if (gamepad1.right_trigger > 0.25 && (mdrivercmdstate == DriverCommandState.ALLIANCE_HUB_LEFT | mdrivercmdstate == DriverCommandState.SHARED_HUB_LEFT)) {
                  felipe.homieRight();
-                 sleep(500);
+                 sleep(700);
                  felipe.homieCenter();
-                 sleep(500);
-                 //debounce(400);
                  sleep(500);
                  felipe.homieCenter();
                  telemetry.addData("Homie Dump Left", "Complete ");
@@ -266,7 +293,7 @@ import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 
              if (gamepad1.right_trigger > 0.25 && (mdrivercmdstate == DriverCommandState.ALLIANCE_HUB_RIGHT | mdrivercmdstate == DriverCommandState.SHARED_HUB_RIGHT)) {
                  felipe.homieLeft();
-                 sleep(500);
+                 sleep(700);
                  felipe.homieCenter();
                  sleep(500);
                  telemetry.addData("Homie Dump Right", "Complete ");
@@ -324,12 +351,14 @@ import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
               *
               * Gamepad #2  - Dpad - Homie Rotate Control      *
               **/
-             if (gamepad2.left_trigger > 0.25 && felipe.linearActuator.getCurrentPosition() > 600 && mdrivercmdstate == DriverCommandState.ALLIANCE_HUB_LEFT) {
-                 felipe.homieRight();
+             if (gamepad2.right_trigger > 0.25 && felipe.linearActuator.getCurrentPosition() >  felipe.HOMIE_OK_2_PIVOT_HT &&
+                     mdrivercmdstate == DriverCommandState.ALLIANCE_HUB_LEFT) {
+                 felipe.homieLeft();
              }
 
-             if (gamepad2.left_trigger > 0.25 &&  felipe.linearActuator.getCurrentPosition() > 600 && mdrivercmdstate == DriverCommandState.ALLIANCE_HUB_RIGHT) {
-                 felipe.homieLeft();
+             if (gamepad2.right_trigger > 0.25 &&  felipe.linearActuator.getCurrentPosition() > felipe.HOMIE_OK_2_PIVOT_HT &&
+                     mdrivercmdstate == DriverCommandState.ALLIANCE_HUB_RIGHT) {
+                 felipe.homieRight();
              }
 
              ////////////////////////////  Driver Input Switch Case     ////////////////
@@ -352,14 +381,14 @@ import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
                  case SHARED_HUB_LEFT:
                      // This if statement makes sure the arm is on the left before lowering. It prevents crashes
                      if (marmstate == ArmState.ARM_LEFT_ALLIANCE) {
-                         marmstate = ArmState.ARM_LEFT_SHARRED;
+                         marmstate = ArmState.ARM_LEFT_SHARED;
                      }
                      break;
 
                  case SHARED_HUB_RIGHT:
                      // This if statement makes sure the arm is on the right before lowering. It prevents crashes
                      if (marmstate == ArmState.ARM_RIGHT_ALLIANCE) {
-                         marmstate = ArmState.ARM_RIGHT_SHARRED;
+                         marmstate = ArmState.ARM_RIGHT_SHARED;
                      }
                      break;
 
@@ -426,6 +455,7 @@ import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
                      felipe.julioArm.setPower(felipe.JULIO_SPEED_DOWN);
                      felipe.intakeOff();
                      patrickState = PatrickState.OFF;
+                     felipe.homieCenter();
 
 
                      break;
@@ -438,7 +468,7 @@ import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 
                      break;
 
-                 case  ARM_LEFT_SHARRED:
+                 case ARM_LEFT_SHARED:
 
                      felipe.julioArm.setTargetPosition((int)(felipe.JULIOARMLEFT45 * felipe.TICKS_PER_DEGREE));
                      julioTarget = (int) (felipe.JULIOARMLEFT45 * felipe.TICKS_PER_DEGREE); // for telemetry
@@ -447,7 +477,7 @@ import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 
 
                      break;
-                 case  ARM_RIGHT_SHARRED:
+                 case ARM_RIGHT_SHARED:
 
                      felipe.julioArm.setTargetPosition((int)(felipe.JULIOARMRIGHT45 * felipe.TICKS_PER_DEGREE));
                      julioTarget = (int) (felipe.JULIOARMRIGHT45 * felipe.TICKS_PER_DEGREE); // for telemetry
@@ -465,16 +495,13 @@ import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 
 
              ////////////////////////////  Lift and Arm position and state checks to sequence the movements correctly and avoid crashes.     ////////////////
-
-             // when lift is no longer busy (! symbol), go ahead and advance the arm to the rotate state.
-             // The arm lowers the freight box "Homie" in between the frame rails. The arm will hit the frame
-             // unless it is lifted up about 6 inches first. THus a lot of sequencing is required.
-             if(felipe.linearActuator.getCurrentPosition() > 2000 && mdrivercmdstate == DriverCommandState.ALLIANCE_HUB_LEFT) {
+             // isBusy() is not always reliable so check lift position instead.
+              if(felipe.linearActuator.getCurrentPosition() > Felipe5.JUAN_OK_2_PIVOT_TICKS && mdrivercmdstate == DriverCommandState.ALLIANCE_HUB_LEFT) {
                  marmstate = ArmState.ARM_LEFT_ALLIANCE;
              }
-
-             if(!felipe.linearActuator.isBusy() && mdrivercmdstate == DriverCommandState.ALLIANCE_HUB_RIGHT) {
-                 marmstate = ArmState.ARM_RIGHT_ALLIANCE; // when lift is no longer busy (! symbol), go ahead and advance the arm to the rotate state.
+             // isBusy() is not always reliable so check lift position instead.
+             if(felipe.linearActuator.getCurrentPosition() > Felipe5.JUAN_OK_2_PIVOT_TICKS && mdrivercmdstate == DriverCommandState.ALLIANCE_HUB_RIGHT) {
+                 marmstate = ArmState.ARM_RIGHT_ALLIANCE; // 
              }
 
              // when RELOAD is called for, don't lower the lift until arm is centered.
@@ -485,15 +512,6 @@ import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
              if(Math.abs(felipe.julioArm.getCurrentPosition()) <= 6 && felipe.linearActuator.getCurrentPosition() <250 && mdrivercmdstate == DriverCommandState.RELOAD) {
                  marmstate = ArmState.ARM_IDLE;
              }
-
-
-             //if(felipe.linearActuator.getCurrentPosition() > 375 && felipe.linearActuator.getCurrentPosition() < 800 && mdrivercmdstate == DriverCommandState.RELOAD) {
-               //  felipe.intakeHelpHomie();
-             //}
-
-             //if(felipe.linearActuator.getCurrentPosition() > 300 && felipe.linearActuator.getCurrentPosition() < 350 && mdrivercmdstate == DriverCommandState.RELOAD) {
-               //  felipe.intakeOff();
-             //}
 
              if(Math.abs(julioError) <= 20 && mdrivercmdstate == DriverCommandState.SHARED_HUB_LEFT | mdrivercmdstate == DriverCommandState.SHARED_HUB_RIGHT){
                 mliftstate = LiftState.LIFT_DOWN;
