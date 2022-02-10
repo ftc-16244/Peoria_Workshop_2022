@@ -1,6 +1,7 @@
  package org.firstinspires.ftc.teamcode.Teleop;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -19,13 +20,13 @@ import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 
 
 /**
- * This is a simple teleop routine for testing localization. Drive the robot around like a normal
- * teleop routine and make sure the robot's estimated pose matches the robot's actual pose (slight
- * errors are not out of the ordinary, especially with sudden drive motions). The goal of this
- * exercise is to ascertain whether the localizer has been configured properly (note: the pure
- * encoder localizer heading may be significantly off if the track width has not been tuned).
+ *  This is an opmode that uses state machines to allow driving and implement motion.
+ *  * It does not use the run to position which means that the motion has to be done wiht
+ *  * a PID control from scratch. This works fairly well bue the arm needs some work to make it
+ *  * stop at the center of the robot. A new opmde using the built in motor control relpaces this one.
  */
 @TeleOp(name="Meet 3 Teleop Modified FSM",group = "Test")
+@Disabled
 public class TeleopMeet3_Mod_StateMachine extends LinearOpMode {
 
     private Felipe4                 felipe                      = new Felipe4(this);
@@ -34,14 +35,14 @@ public class TeleopMeet3_Mod_StateMachine extends LinearOpMode {
     private ElapsedTime             lifttime                    = new ElapsedTime(); // used to see how long it takes to lift
     private ElapsedTime             armtime                     = new ElapsedTime(); // used to see how long it takes the arm to pivot
     private ElapsedTime             PIDtimer                    = new ElapsedTime(); // used to see how long it takes the arm to pivot
-    private ElapsedTime             teleopTimer                = new ElapsedTime();
+    private ElapsedTime             teleopTimer                 = new ElapsedTime();
 
     private LiftState               mliftstate                  = LiftState.LIFT_IDLE; // "m" = class variable that all methods can share. Not a local variable
     private ArmState                marmstate                   = ArmState.ARM_PARKED;
     private DriverCommandState      mdrivercmdstate             = DriverCommandState.UNKNOWN;
     private HomieState              mhomieState                 = HomieState.NONE;
 
-    private int                TELEOP_TIME_OUT            = 125;
+    private int                     TELEOP_TIME_OUT            = 125;
 
     // ENUMS
 /*

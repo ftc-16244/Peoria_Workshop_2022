@@ -55,7 +55,7 @@ import org.firstinspires.ftc.teamcode.util.Encoder;
  */
 
 @TeleOp(name="Rev Encoder Test", group="Linear Opmode")
-//@Disabled
+@Disabled
 public class revArmEncoderTest extends LinearOpMode {
 
     // Declare OpMode members.
