@@ -56,10 +56,10 @@ public class Felipe5 {
 
 
     //Constants for new motor version of Julio Arm
-    public static final double      JULIOARMLEFT            =   -90.0;
+    public static final double      JULIOARMLEFT            =   -95.0;
     public static final double      JULIOARMLEFT45          =   -65.0;
     public static final double      JULIOARMCENTER          =   0.0;
-    public static final double      JULIOARMRIGHT           =   90.0;
+    public static final double      JULIOARMRIGHT           =   95.0;
     public static final double      JULIOARMRIGHT45         =   65.0;
     public static final double      JULIOTURNSPEED          =   0.4; // if this goes to fast it bounces back and hits the frame
     public static final double      JULIO_SPEED_UP          =   0.7; // power to rotate up
