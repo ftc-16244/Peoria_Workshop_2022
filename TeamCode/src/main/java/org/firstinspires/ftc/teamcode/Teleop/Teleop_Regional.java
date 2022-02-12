@@ -151,7 +151,7 @@ import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 
          telemetry.addData("Encoder Reset to ",felipe.linearActuator.getCurrentPosition());
 
-         while (!isStopRequested()  &&  teleopTimer.seconds() < TELEOP_TIME_OUT ) {
+         while (!isStopRequested() ) {
 
              switch ( mdriveSpeedState){
                  case SLOW:
