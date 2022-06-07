@@ -1,4 +1,4 @@
- package org.firstinspires.ftc.teamcode.Teleop;
+  package org.firstinspires.ftc.teamcode.Teleop;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
@@ -38,7 +38,7 @@ import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
      private DriverCommandState      mdrivercmdstate            = DriverCommandState.UNKNOWN;
 
 
-     private int                    TELEOP_TIME_OUT             = 130;
+     private double                    TELEOP_TIME_OUT             = 130;
 
      public static final double NEW_P = 7;//10 orig
      public static final double NEW_I = 1.0;//0.5
@@ -151,7 +151,7 @@ import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 
          telemetry.addData("Encoder Reset to ",felipe.linearActuator.getCurrentPosition());
 
-         while (!isStopRequested() ) {
+         while (!isStopRequested() && teleopTimer.time() < TELEOP_TIME_OUT ) {
 
              switch ( mdriveSpeedState){
                  case SLOW:
