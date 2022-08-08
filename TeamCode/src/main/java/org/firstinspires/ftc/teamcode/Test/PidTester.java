@@ -7,6 +7,8 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import org.firstinspires.ftc.teamcode.Subsystems.CarouselTurnerThingy;
 import org.firstinspires.ftc.teamcode.Subsystems.FelipeTrois;
+import org.firstinspires.ftc.teamcode.Subsystems.Slide_Trainer;
+
 @TeleOp(group = "Test")
 @Disabled
 
@@ -39,6 +41,7 @@ public class PidTester extends LinearOpMode {
 
         // get the PID coefficients for the RUN_USING_ENCODER  modes.
         PIDFCoefficients pidfOrig = felipe.julioArm.getPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER);
+
 
         // change coefficients using methods included with DcMotorEx class.
         PIDFCoefficients pidfNew = new PIDFCoefficients(NEW_P, NEW_I, NEW_D, NEW_F);
