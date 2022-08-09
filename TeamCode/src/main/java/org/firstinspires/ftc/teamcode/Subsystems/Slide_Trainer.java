@@ -30,6 +30,7 @@ public class Slide_Trainer {
     private RevTouchSensor  lowerLimitSwitch        = null; // always an odd port
     public  DigitalChannel  redLED                  = null; // this goes on an odd port of Digital Channels 1,3,5,7
     public  DigitalChannel  greenLED                = null; // green connects to an even port 2,4,6,8
+    public  Servo           servo;
 
     Telemetry       telemetry;
     LinearOpMode    opmode; // need content from Linear opmodes here. Elapsed time mainly
@@ -58,6 +59,7 @@ public class Slide_Trainer {
 
     public double  targetHeight;
 
+
     int tol;
     int newtolerance;
 
@@ -76,7 +78,8 @@ public class Slide_Trainer {
        this.opmode = opmode;
 
    }
-    public void init(HardwareMap hwMap)  {
+
+   public void init(HardwareMap hwMap)  {
 
 
         // Initialize the random motor
@@ -86,6 +89,10 @@ public class Slide_Trainer {
         // Initialize the slide motor
         slidemotor = hwMap.get(DcMotorEx.class,"slideMotor");
         slidemotor.setDirection(DcMotorEx.Direction.REVERSE);
+
+        // servo
+        servo = hwMap.get(Servo.class, "servo");
+        servo.setPosition(0.0);
 
         //Initialize the LED and change to output
         redLED = hwMap.get(DigitalChannel.class, "red"); // Digital Device - Digital Device (not LED)
@@ -130,16 +137,20 @@ public class Slide_Trainer {
         return  slidePos;
     }
 
+
+
     public void  setSlideLevel1(){
 
         targetHeight = ( SLIDE_LEVEL_1 );
         liftToTargetHeight(targetHeight,3);
+        servo.setPosition(0);
 
     }
 
     public void setSlideLevel2(){
         targetHeight = ( SLIDE_LEVEL_2);
         liftToTargetHeight(targetHeight,3);
+        servo.setPosition(0);
 
 
     }
@@ -147,6 +158,7 @@ public class Slide_Trainer {
     public void setSlideLevel3(){
         targetHeight = ( SLIDE_LEVEL_3);
         liftToTargetHeight(targetHeight,3);
+        servo.setPosition(1.0);
 
 
     }
@@ -154,6 +166,7 @@ public class Slide_Trainer {
     public void setSlideLevel4(){
         targetHeight = ( SLIDE_LEVEL_4);
         liftToTargetHeight(targetHeight,3);
+        servo.setPosition(1.0);
 
 
     }
@@ -163,10 +176,11 @@ public class Slide_Trainer {
 
         slidemotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER); // need to swich off encoder to run with a timer
         slidemotor.setPower(SLIDELOWERSPEED);
+        servo.setPosition(0);
         runtime.reset();
         // opmode is not active during init so take that condition out of the while loop
         // reset for time allowed or until the limit/ touch sensor is pressed.
-        while ( !lowerLimitSwitch.isPressed()) {
+        while (runtime.seconds() < 3.0 && !lowerLimitSwitch.isPressed()) {
 
 
             //Time wasting loop so slide can retract. Loop ends when time expires or tiuch sensor is pressed
@@ -180,7 +194,7 @@ public class Slide_Trainer {
         // set everything back the way is was before reset so encoders can be used
        slidemotor.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
        slidemotor.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-       slideTrainerState = SlideTrainerState.IDLE;// once this is done we are at zero power or idling.
+       //slideTrainerState = SlideTrainerState.IDLE;// once this is done we are at zero power or idling.
 
         redLED.setState(false);
         greenLED.setState(true);
@@ -215,15 +229,14 @@ public class Slide_Trainer {
             //while (opmode.opModeIsActive() &&
               //      (runtime.seconds() < timeoutS) && slidemotor.isBusy()) {
 
-                // Display it for the driver.
-                //telemetry.addData("Moving to New Lift Height",  "Running to %7d", newTargetHeight);
 
-                //telemetry.update();
             //}
 
 
 
         }
+
+
     }
 
 }
