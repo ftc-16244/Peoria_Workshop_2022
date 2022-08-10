@@ -3,18 +3,12 @@ package org.firstinspires.ftc.teamcode.Teleop;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
-import com.acmerobotics.roadrunner.geometry.Pose2d;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DigitalChannel;
-import com.qualcomm.robotcore.hardware.PIDFCoefficients;
-import com.qualcomm.robotcore.util.ElapsedTime;
+
 import org.firstinspires.ftc.teamcode.Enums.SlideTrainerState;
 import org.firstinspires.ftc.teamcode.Subsystems.Slide_Trainer;
-import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
+import org.firstinspires.ftc.teamcode.Subsystems.Slide_Trainer_Seq;
 
 /**
  * This is a simple teleop routine for testing localization. Drive the robot around like a normal
@@ -25,13 +19,13 @@ import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
  */
 
 @Config
-@TeleOp(group = "Viper Slide Test")
+@TeleOp(group = "Viper Slide w/ Sequencing")
 //@Disabled
-public class SlideTrainerTest<slideTrainerState> extends LinearOpMode {
+public class SlideTrainerTestSequencer<slideTrainerState> extends LinearOpMode {
 
     FtcDashboard dashboard;
 
-    Slide_Trainer slideTrainer = new Slide_Trainer(this);
+    Slide_Trainer_Seq slideTrainer = new Slide_Trainer_Seq(this);
     SlideTrainerState slideTrainerState = SlideTrainerState.UNKNOWN;
 
     double pos;
