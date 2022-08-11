@@ -37,10 +37,10 @@ public class Slide_Trainer {
     //Constants Lift
     public  static double            SLIDELIFTSPEED                  = 1.0; //
     public static  double            SLIDELOWERSPEED                 = -0.4; // use the LOAD instead of down. Zero pushes wheels off the mat
-    private static final double      SLIDE_LEVEL_1                   = 1; // inches
-    private static final double      SLIDE_LEVEL_2                   = 4; // inches
-    private static final double      SLIDE_LEVEL_3                   = 7; // inches
-    private static final double      SLIDE_LEVEL_4                   = 10; // inches
+    public static final double      SLIDE_LEVEL_1                   = 1; // inches
+    public static final double      SLIDE_LEVEL_2                   = 4; // inches
+    public static final double      SLIDE_LEVEL_3                   = 7; // inches
+    public static final double      SLIDE_LEVEL_4                   = 10; // inches
 
 
     private static final double     TICKS_PER_MOTOR_REV             = 537.7; // goBilda 312 RPM
@@ -140,14 +140,14 @@ public class Slide_Trainer {
 
         targetHeight = ( SLIDE_LEVEL_1 );
         liftToTargetHeight(targetHeight,3);
-        servo.setPosition(0);
+        //servo.setPosition(0);
 
     }
 
     public void setSlideLevel2(){
         targetHeight = ( SLIDE_LEVEL_2);
         liftToTargetHeight(targetHeight,3);
-        servo.setPosition(0);
+        //servo.setPosition(0);
 
 
     }
@@ -155,7 +155,7 @@ public class Slide_Trainer {
     public void setSlideLevel3(){
         targetHeight = ( SLIDE_LEVEL_3);
         liftToTargetHeight(targetHeight,3);
-        servo.setPosition(1.0);
+        //servo.setPosition(1.0);
 
 
     }
@@ -163,7 +163,7 @@ public class Slide_Trainer {
     public void setSlideLevel4(){
         targetHeight = ( SLIDE_LEVEL_4);
         liftToTargetHeight(targetHeight,3);
-        servo.setPosition(1.0);
+        //servo.setPosition(1.0);
 
 
     }
