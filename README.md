@@ -1,4 +1,4 @@
-# Advanced Mechanisms Worksop Files
+# Advanced Mechanisms Workshop Files - Peoria 2022
 
 This was copied from a Roadrunner project mainly to make the FTC dashboard work for training. It was easier to copy than start a new repo.
 
