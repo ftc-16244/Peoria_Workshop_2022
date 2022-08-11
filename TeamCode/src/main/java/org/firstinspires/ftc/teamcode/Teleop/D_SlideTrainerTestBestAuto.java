@@ -5,10 +5,12 @@ import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.teamcode.Enums.SlideTrainerState;
 import org.firstinspires.ftc.teamcode.Subsystems.Slide_Trainer;
-import org.firstinspires.ftc.teamcode.Subsystems.Slide_Trainer_Seq;
+
+import static org.firstinspires.ftc.teamcode.Subsystems.Slide_Trainer.SLIDELIFTSPEED;
 
 /**
  * This is a simple teleop routine for testing localization. Drive the robot around like a normal
@@ -19,14 +21,16 @@ import org.firstinspires.ftc.teamcode.Subsystems.Slide_Trainer_Seq;
  */
 
 @Config
-@TeleOp(group = "Viper Slide w/ Sequencing")
+@TeleOp(group = "FSM Viper Slide Test")
 //@Disabled
-public class SlideTrainerTestSequencer<slideTrainerState> extends LinearOpMode {
+public class D_SlideTrainerTestBestAuto<slideTrainerState> extends LinearOpMode {
 
     FtcDashboard dashboard;
 
-    Slide_Trainer_Seq slideTrainer = new Slide_Trainer_Seq(this);
+    Slide_Trainer slideTrainer = new Slide_Trainer(this);
     SlideTrainerState slideTrainerState = SlideTrainerState.UNKNOWN;
+
+    double slideError = 0.5;
 
     double pos;
     //public static double SLIDE_NEW_P = 2.5; // 2.5
@@ -73,7 +77,7 @@ public class SlideTrainerTestSequencer<slideTrainerState> extends LinearOpMode {
              *
              **/
             if (gamepad1.a) {
-                slideTrainer.setSlideLevel4();;
+                //slideTrainer.setSlideLevel4();;
                 slideTrainerState = SlideTrainerState.EXTRA_HIGH;
             }
 
@@ -188,12 +192,20 @@ public class SlideTrainerTestSequencer<slideTrainerState> extends LinearOpMode {
                 case UNKNOWN:
                     break;
                 case IDLE:
+                    telemetry.addData("Idle Power Off", slideTrainerState);
+                    //slideTrainer.greenLED.setState(true);
+                    //slideTrainer.redLED.setState(false);
+                    slideTrainer.slidemotor.setPower(0); // set to zero to prevent motor burnout
+
                     break;
 
                 case LOW:
                     telemetry.addData("Low Slide Position", slideTrainerState);
                     slideTrainer.greenLED.setState(false);
                     slideTrainer.redLED.setState(true);
+                    slideTrainer.setSlideLevel1(); // uses subsystem to set the height to level 4
+                    slideTrainer.slidemotor.setPower(Math.abs(SLIDELIFTSPEED)); // static variable from susystem
+                    slideTrainer.slidemotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
                     break;
 
@@ -201,17 +213,26 @@ public class SlideTrainerTestSequencer<slideTrainerState> extends LinearOpMode {
                     telemetry.addData("Mid Slide Position", slideTrainerState);
                     slideTrainer.greenLED.setState(false);
                     slideTrainer.redLED.setState(false);
+                    slideTrainer.setSlideLevel2(); // uses subsystem to set the height to level 4
+                    slideTrainer.slidemotor.setPower(Math.abs(SLIDELIFTSPEED)); // static variable from susystem
+                    slideTrainer.slidemotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
                     break;
                 case HIGH:
                     telemetry.addData("High Slide Position", slideTrainerState);
                     slideTrainer.greenLED.setState(true);
                     slideTrainer.redLED.setState(true);
+                    slideTrainer.setSlideLevel3(); // uses subsystem to set the height to level 4
+                    slideTrainer.slidemotor.setPower(Math.abs(SLIDELIFTSPEED)); // static variable from susystem
+                    slideTrainer.slidemotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     break;
                 case EXTRA_HIGH:
                     telemetry.addData("Extra high Position", slideTrainerState);
                     slideTrainer.greenLED.setState(true);
                     slideTrainer.redLED.setState(false);
+                    slideTrainer.setSlideLevel4(); // uses subsystem to set the height to level 4
+                    slideTrainer.slidemotor.setPower(Math.abs(SLIDELIFTSPEED)); // static variable from susystem
+                    slideTrainer.slidemotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     break;
                 case MECH_RESET:
                     telemetry.addData("Hard Reset", slideTrainerState);
@@ -220,8 +241,48 @@ public class SlideTrainerTestSequencer<slideTrainerState> extends LinearOpMode {
 
 
             }
+            // example of how to programatically change states when conditions are met.
+            if (slideTrainerState == SlideTrainerState.MECH_RESET && slideTrainer.getSlidePos() <0.2){
+                slideTrainerState = SlideTrainerState.IDLE;
+            }
+            if (slideTrainerState == SlideTrainerState.EXTRA_HIGH &&
+                    slideTrainer.getSlidePos() > slideTrainer.SLIDE_LEVEL_4 -slideError &&
+                    slideTrainer.getSlidePos() <slideTrainer.SLIDE_LEVEL_4 + slideError) {
+                slideTrainer.servo.setPosition(.75);
+                slideTrainerState = SlideTrainerState.IDLE; // change state to keep servo from shuttering
+
+            }
+
+            if (slideTrainerState == SlideTrainerState.HIGH &&
+                    slideTrainer.getSlidePos() > slideTrainer.SLIDE_LEVEL_3 -slideError &&
+                    slideTrainer.getSlidePos() <slideTrainer.SLIDE_LEVEL_3 + slideError) {
+                slideTrainer.servo.setPosition(.50);
+                slideTrainerState = SlideTrainerState.IDLE; // change state to keep servo from shuttering
+
+            }
+
+            if (slideTrainerState == SlideTrainerState.MID &&
+                    slideTrainer.getSlidePos() > slideTrainer.SLIDE_LEVEL_2 -slideError &&
+                    slideTrainer.getSlidePos() <slideTrainer.SLIDE_LEVEL_2 + slideError) {
+                slideTrainer.servo.setPosition(.25);
+                slideTrainerState = SlideTrainerState.IDLE; // change state to keep servo from shuttering
+
+            }
+
+            if (slideTrainerState == SlideTrainerState.LOW &&
+                    slideTrainer.getSlidePos() > slideTrainer.SLIDE_LEVEL_1 -slideError &&
+                    slideTrainer.getSlidePos() <slideTrainer.SLIDE_LEVEL_1 + slideError) {
+                slideTrainer.servo.setPosition(0);
+                slideTrainerState = SlideTrainerState.IDLE; // change state to keep servo from shuttering
+
+            }
+
+
+
+
             telemetry.addData("Target Position", slideTrainer.targetHeight);
             telemetry.addData("Actual Position","%.1f", slideTrainer.getSlidePos());
+            telemetry.addData("Slide Motor Power","%.1f", slideTrainer.slidemotor.getPower());
             telemetry.update();
 
 

@@ -27,7 +27,7 @@ import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 @Config
 @TeleOp(group = "Viper Slide Test")
 //@Disabled
-public class SlideTrainerTest<slideTrainerState> extends LinearOpMode {
+public class B_SlideTrainerPartialAuto<slideTrainerState> extends LinearOpMode {
 
     FtcDashboard dashboard;
 
@@ -158,18 +158,26 @@ public class SlideTrainerTest<slideTrainerState> extends LinearOpMode {
              *
              **/
             if (gamepad1.dpad_left) {
+                slideTrainer.servo.setPosition(0.0);
+                telemetry.addData("Servo Position", "0");
+            }
 
-                telemetry.addData("High Goal", "Complete ");
+            if (gamepad1.dpad_up) {
+
+                slideTrainer.servo.setPosition(0.25);
+                telemetry.addData("Servo Position", "25%");
             }
 
             if (gamepad1.dpad_right) {
 
-                telemetry.addData("High Goal", "Complete ");
+                slideTrainer.servo.setPosition(0.5);
+                telemetry.addData("Servo Position", "50%");
             }
 
             if (gamepad1.dpad_down) {
 
-                telemetry.addData("lower elevator", "Complete ");
+                slideTrainer.servo.setPosition(0.75);
+                telemetry.addData("Servo Position", "75%");
             }
 
             /**
