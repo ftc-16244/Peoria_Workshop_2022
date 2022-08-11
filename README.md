@@ -1,6 +1,9 @@
-# Road Runner Quickstart
+# Advance Mechanisms Worksop Files
+
+This was copied from a Roadrunner project mainly to make the FTC dashboard work for training. It was easier to copy than start a new repo.
 
 An example FTC project using [Road Runner](https://github.com/acmerobotics/road-runner). **Note:** Road Runner is in alpha and many of its APIs are incubating.
+
 
 ## Installation
 
