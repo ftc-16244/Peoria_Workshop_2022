@@ -11,11 +11,14 @@ import org.firstinspires.ftc.teamcode.Subsystems.Slide_Trainer;
 import org.firstinspires.ftc.teamcode.Subsystems.Slide_Trainer_Seq;
 
 /**
- * This is a simple teleop routine for testing localization. Drive the robot around like a normal
- * teleop routine and make sure the robot's estimated pose matches the robot's actual pose (slight
- * errors are not out of the ordinary, especially with sudden drive motions). The goal of this
- * exercise is to ascertain whether the localizer has been configured properly (note: the pure
- * encoder localizer heading may be significantly off if the track width has not been tuned).
+ * This is the next improvment on the Viper Slide Trainer. Here we coordiante the lift and servo
+ * commands all onto the buttone. Each button moves the slide to a level and then moved the servo
+ * to one of 4 positions. This is pretty good and in many cases good enough. This opmode has a pitfall
+ * that can be frustration. The slide sits in a while loop until it reaches its target. Once the target is
+ * reached, the servo moves. This is good for lift an servo cordination. But, this while loop cases the
+ * other gamepad functions to be "suspended" until the loop finishes. This is terrible for coordinating
+ * the drivetrain with an implement. The drivetrain power will stay constant while the slide is in its loop
+ * this means inability to start or stop at times. Use with caution. Or go to the state machine version.
  */
 
 @Config

@@ -17,11 +17,9 @@ import org.firstinspires.ftc.teamcode.Subsystems.Slide_Trainer;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 
 /**
- * This is a simple teleop routine for testing localization. Drive the robot around like a normal
- * teleop routine and make sure the robot's estimated pose matches the robot's actual pose (slight
- * errors are not out of the ordinary, especially with sudden drive motions). The goal of this
- * exercise is to ascertain whether the localizer has been configured properly (note: the pure
- * encoder localizer heading may be significantly off if the track width has not been tuned).
+ * This is a opmode is the first step to making the Viper slide trainer more user friendly. Here
+ * we use the gamepad buttone to go to 4 pre-set heights. The servo and the intake motor are still
+ * controlled manually. This makes operation better but there is still room for improvement.
  */
 
 @Config

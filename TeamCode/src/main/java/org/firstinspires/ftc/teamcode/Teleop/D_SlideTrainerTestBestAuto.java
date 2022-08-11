@@ -13,11 +13,10 @@ import org.firstinspires.ftc.teamcode.Subsystems.Slide_Trainer;
 import static org.firstinspires.ftc.teamcode.Subsystems.Slide_Trainer.SLIDELIFTSPEED;
 
 /**
- * This is a simple teleop routine for testing localization. Drive the robot around like a normal
- * teleop routine and make sure the robot's estimated pose matches the robot's actual pose (slight
- * errors are not out of the ordinary, especially with sudden drive motions). The goal of this
- * exercise is to ascertain whether the localizer has been configured properly (note: the pure
- * encoder localizer heading may be significantly off if the track width has not been tuned).
+ * This is the final example for the Viper Slide Trainer. It uses a state machine to overcome the
+ * the freezing up of the drivetrain (or intake) when the implement is going through its sequence.
+ * THis is only an example of how to do this. It is more complicated but worth learning. FTC is all about
+ * seconds count. This is how you shave off seconds.
  */
 
 @Config
