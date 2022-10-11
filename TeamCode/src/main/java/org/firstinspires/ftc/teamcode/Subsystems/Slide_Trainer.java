@@ -38,15 +38,15 @@ public class Slide_Trainer {
     public  static double            SLIDELIFTSPEED                  = 1.0; //
     public static  double            SLIDELOWERSPEED                 = -0.4; // use the LOAD instead of down. Zero pushes wheels off the mat
     public static final double      SLIDE_LEVEL_1                   = 1; // inches
-    public static final double      SLIDE_LEVEL_2                   = 4; // inches
-    public static final double      SLIDE_LEVEL_3                   = 7; // inches
-    public static final double      SLIDE_LEVEL_4                   = 10; // inches
+    public static final double      SLIDE_LEVEL_2                   = 13; // inches
+    public static final double      SLIDE_LEVEL_3                   = 25; // inches
+    public static final double      SLIDE_LEVEL_4                   = 38; // inches
 
 
-    private static final double     TICKS_PER_MOTOR_REV             = 537.7; // goBilda 312 RPM
+    private static final double     TICKS_PER_MOTOR_REV             = 145.1; // goBilda 1150  //312 RPM  537.7
     private static final double     PULLEY_DIA                      = 40; // milimeters
     private static final double     SLIDE_LIFT_DISTANCE_PER_REV     = PULLEY_DIA * Math.PI / 25.4; //  lift = circimference of the pulley converted to inches
-    private static final double      TICKS_PER_LIFT_IN               = 109; //TICKS_PER_MOTOR_REV /  SLIDE_LIFT_DISTANCE_PER_REV; // 109 and change
+    private static final double      TICKS_PER_LIFT_IN               = 29; //TICKS_PER_MOTOR_REV /  SLIDE_LIFT_DISTANCE_PER_REV; // 109 and change
 
     public static double SLIDE_NEW_P = 10.0; // 2.5 default
     public static double SLIDE_NEW_I = 0.1;// 0.1 default
